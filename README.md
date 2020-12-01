@@ -18,7 +18,7 @@ The goal of the existing opt-in is to block interesting data that an attacker wo
 
 In this new COEP variant, cross-origin subresource requests would be sent without credentials by default. Specific requests which require credentials can opt-into including them, at the cost of shifting the request's mode to require a [CORS check](https://fetch.spec.whatwg.org/#concept-cors-check) on the response. This bifurcation between credentiallessness and CORS means either that servers don't have browser-provided identifiers which could be used to personalize a response (see the isolation section below, however, for an important caveat), or that they explicitly opt-in to exposing the response's content to the requesting origin.
 
-As an example, consider a developer who wishes to load an image into a context isolated in the way described above. The <img> element has a crossorigin attribute which allows developers to alter the outgoing request's state. In this new mode, the following table describes the outgoing request's properties in Fetch's terms for various values:
+As an example, consider a developer who wishes to load an image into a context isolated in the way described above. The `<img>` element has a `crossorigin` attribute which allows developers to alter the outgoing request's state. In this new mode, the following table describes the outgoing request's properties in Fetch's terms for various values:
 
 
 | | Request's [Mode](https://fetch.spec.whatwg.org/#concept-request-mode) | Request's [Credentials Mode](https://fetch.spec.whatwg.org/#concept-request-credentials-mode) |
