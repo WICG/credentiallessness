@@ -16,14 +16,14 @@ The goal of the existing opt-in is to block interesting data that an attacker wo
 
 ### What is credentiallessness?
 
-In this new COEP variant, cross-origin subresource requests would be sent without credentials by default. Specific requests which require credentials can opt-into including them, at the cost of shifting the request's mode to require a [CORS check](https://fetch.spec.whatwg.org/#concept-cors-check) on the response. This bifurcation between credentiallessness and CORS means either that servers don't have browser-provided identifiers which could be used to personalize a response (see the isolation section below, however, for an important caveat), or that they explicitly opt-in to exposing the response's content to the requesting origin.
+In this new COEP variant, subresource requests would be sent without credentials by default. Specific requests which require credentials can opt-into including them, at the cost of shifting the request's mode to require a [CORS check](https://fetch.spec.whatwg.org/#concept-cors-check) on the response. This bifurcation between credentiallessness and CORS means either that servers don't have browser-provided identifiers which could be used to personalize a response (see the isolation section below, however, for an important caveat), or that they explicitly opt-in to exposing the response's content to the requesting origin.
 
 As an example, consider a developer who wishes to load an image into a context isolated in the way described above. The `<img>` element has a `crossorigin` attribute which allows developers to alter the outgoing request's state. In this new mode, the following table describes the outgoing request's properties in Fetch's terms for various values:
 
 
 | | Request's [Mode](https://fetch.spec.whatwg.org/#concept-request-mode) | Request's [Credentials Mode](https://fetch.spec.whatwg.org/#concept-request-credentials-mode) |
 |-|----------------|----------------------------|
-| `<img src="https://example.com/img.png">` | `no-cors` | `same-origin` |
+| `<img src="https://example.com/img.png">` | `no-cors` | `none` |
 | <code>&lt;img src="https://example.com/img.png" <strong>crossorigin="anonymous"</strong>></code> | `cors` | `same-origin` |
 | <code>&lt;img src="https://example.com/img.png" <strong>crossorigin="use-credentials"</strong>></code> | `cors` | `include` |
 
@@ -33,7 +33,9 @@ Cross-origin nested navigational requests (`<iframe>`, etc) are more complicated
 
 2. We strip credentials from the request for the nested document, and merely require the response to [opt-into being embeddable via XFO or CSP](https://github.com/mikewest/embedding-requires-opt-in). We use that opt-in as justification for imposing `x-bikeshed-credentialless-unless-cors` upon the framed document.
 
-(_Note: The first of these seems reasonable, the second is more iffy (though substantially easier to deploy!). For example: should a credentiallessly-requested document have access to storage? To mitigate risk in this case, perhaps we should we also make the default Fetch credentials mode none instead of same-origin? More thought necessary!_)
+Note that imposing the policy onto the nested document will have the effect of removing credentials from requests that would otherwise be considered same-origin, as the default credential mode for `no-cors` requests shifts from `same-origin` to `none`.
+
+(_Note: The first of these seems reasonable, the second is more iffy (though substantially easier to deploy!). For example: should a credentiallessly-requested document have access to storage? More thought necessary!_)
 
 Top-level navigation would be unaffected by this proposal: outgoing navigational requests would continue to be sent with a mode of navigate, and would include credentials.
 
