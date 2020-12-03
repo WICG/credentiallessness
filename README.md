@@ -4,7 +4,7 @@
 
 ## A Problem
 
-Sites that wish to continue using SharedArrayBuffer will need to opt-into cross-origin isolation in order to continue using that API. Among other things, cross-origin isolation will block the use of cross-origin resources and documents unless those resources opt-into inclusion via either CORS or CORP. This behavior ships today in Firefox, and Chrome aims to ship it as well in 2021H1.
+Sites that wish to continue using SharedArrayBuffer must opt-into cross-origin isolation. Among other things, cross-origin isolation will block the use of cross-origin resources and documents unless those resources opt-into inclusion via either CORS or CORP. This behavior ships today in Firefox, and Chrome aims to ship it as well in 2021H1.
 
 The opt-in requirement is generally positive, as it ensures that developers have the opportunity to adequately evaluate the rewards of being included cross-site against the risks of potential data leakage via those environments. It poses adoption challenges, however, as it does require developers to adjust their servers to send an explicit opt-in. This is challenging in cases where there's not a single developer involved, but many. Google Earth, for example, includes user-generated content in sandboxed frames, and it seems somewhat unlikely that they'll be able to ensure that all the resources typed in by all their users over the years will do the work to opt-into being loadable.
 
