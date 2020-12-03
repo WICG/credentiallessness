@@ -23,7 +23,7 @@ As an example, consider a developer who wishes to load an image into a context i
 
 | | Request's [Mode](https://fetch.spec.whatwg.org/#concept-request-mode) | Request's [Credentials Mode](https://fetch.spec.whatwg.org/#concept-request-credentials-mode) |
 |-|----------------|----------------------------|
-| `<img src="https://example.com/img.png">` | `no-cors` | `none` |
+| `<img src="https://example.com/img.png">` | `no-cors` | `omit` |
 | <code>&lt;img src="https://example.com/img.png" <strong>crossorigin="anonymous"</strong>></code> | `cors` | `same-origin` |
 | <code>&lt;img src="https://example.com/img.png" <strong>crossorigin="use-credentials"</strong>></code> | `cors` | `include` |
 
@@ -33,7 +33,7 @@ Cross-origin nested navigational requests (`<iframe>`, etc) are more complicated
 
 2. We strip credentials from the request for the nested document, and merely require the response to [opt-into being embeddable via XFO or CSP](https://github.com/mikewest/embedding-requires-opt-in). We use that opt-in as justification for imposing `x-bikeshed-credentialless-unless-cors` upon the framed document.
 
-Note that imposing the policy onto the nested document will have the effect of removing credentials from requests that would otherwise be considered same-origin, as the default credential mode for `no-cors` requests shifts from `same-origin` to `none`.
+Note that imposing the policy onto the nested document will have the effect of removing credentials from requests that would otherwise be considered same-origin, as the default credential mode for `no-cors` requests shifts from `same-origin` to `omit`.
 
 (_Note: The first of these seems reasonable, the second is more iffy (though substantially easier to deploy!). For example: should a credentiallessly-requested document have access to storage? More thought necessary!_)
 
