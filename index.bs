@@ -14,45 +14,30 @@ Canonical URL: https://html.spec.whatwg.org/#coep-credentialless
 Issue Tracking: whatwg/html topic: cross-origin-embedder-policy-credentialless https://github.com/whatwg/html/labels/topic%3A%20cross-origin-embedder-policy-credentialless
 Boilerplate: repository-issue-tracking off
 Abstract:
-    Sites that wish to continue using SharedArrayBuffer must opt-into
-    cross-origin isolation. Among other things, cross-origin isolation will
-    block the use of cross-origin resources and documents unless those resources
-    opt-into inclusion via either CORS or CORP. This behavior ships today in
-    Firefox, and Chrome aims to ship it as well in 2021H1.
+    credentialless is a new value for the Cross-Origin-Embedder-Policy (COEP).
+    Similarly to require-corp, it can be used to enable cross-origin-isolation,
+    but is easier to deploy.
 
-    In order to support interesting and powerful APIs in a post-Spectre world, it seems necessary
-    to ensure that resoures are only voluntarily embedded into a potentially-dangerous context.
-    This document sketches out a potential opt-in mechanism which relies upon explicit declaration
-    of a `Cross-Origin-Resource-Policy` for each embedded resource, defined as a series of
-    monkey-patches against HTML and Fetch which are intended to be upstreamed.
+    Instead of requiring a CORP header for every no-cors subresources,
+    COEP:credentialless is requesting them without credentials (Cookies, Client
+    certificates, etc...).
 </pre>
 <pre boilerplate="copyright">&copy;2021, Google, Inc. All rights reserved.</pre>
 
 <pre class="biblio">
 {
-  "spectre": {
-    "authors": [
-      "Paul Kocher", "Jann Horn", "Anders Fogh", "Daniel Genkin", "Daniel Gruss", "Werner Haas", "Mike Hamburg", "Moritz Lipp", "Stefan Mangard", "Thomas Prescher", "Michael Schwarz", "Yuval Yarom"
-    ],
-    "href": "https://spectreattack.com/spectre.pdf",
-    "title": "Spectre Attacks: Exploiting Speculative Execution"
-  },
-
-  "chromium-post-spectre-rethink": {
-    "authors": [ "The Chromium Project" ],
-    "href": "https://chromium.googlesource.com/chromium/src/+/master/docs/security/side-channel-threat-model.md",
-    "title": "Post-Spectre Threat Model Re-Think"
-  },
-
-  "I-D.ietf-httpbis-header-structure": {
-    "authors": [ "Mark Nottingham", "Poul-Henning Kamp" ],
-    "href": "https://tools.ietf.org/html/draft-ietf-httpbis-header-structure",
-    "title": "Structured Headers for HTTP",
-    "status": "ID",
-    "publisher": "IETF"
-  }
 }
 </pre>
+
+<style>
+.monkey-patch {
+    padding: .5em;
+    border: thin solid #ddd;
+    border: thin solid 1px;
+    border-radius: .5em;
+    margin: .5em calc(-0.5em - 1px);
+}
+</style>
 
 <pre class="anchors">
 urlPrefix: https://tc39.es/ecma262/; spec: ECMAScript
@@ -82,18 +67,19 @@ urlPrefix: https://html.spec.whatwg.org/
 </pre>
 
 <pre class="link-defaults">
-spec:fetch; type:dfn; for:/; text:request
-spec:fetch; type:dfn; text: cors check
-spec:fetch; type:dfn; for:/; text:network error
-spec:url; type:dfn; for:/; text:url
-spec:html; type:dfn; for:/; text:browsing context
-spec:html; type:dfn; text:environment
-spec:html; type:dfn; text: browsing context group
-spec:fetch; type:dfn; for:/; text:response
 spec:fetch; type:dfn; for:/; text:cross-origin resource policy check
-spec:html; type:dfn; for:/; text:global object
+spec:fetch; type:dfn; for:/; text:network error
+spec:fetch; type:dfn; for:/; text:request
+spec:fetch; type:dfn; for:/; text:coep-require-corp
+spec:fetch; type:dfn; for:/; text:response
+spec:fetch; type:dfn; text: cors check
+spec:html; type:dfn; for:/; text:browsing context
 spec:html; type:dfn; for:/; text:container document
+spec:html; type:dfn; for:/; text:global object
 spec:html; type:dfn; for:/; text:parent browsing context
+spec:html; type:dfn; text: browsing context group
+spec:html; type:dfn; text:environment
+spec:url; type:dfn; for:/; text:url
 </pre>
 
 A Problem {#problem}
@@ -121,49 +107,194 @@ any opt-in mechanism is going to be limited. From a deployment perspective
 if we could find an approach that provided robust-enough protection against
 accidental cross-process leakage without requiring an explicit opt-in.
 
-Introduction {#intro}
-=====================
+A Proposal {#proposal}
+==========
 
-The same-origin policy's restrictions against direct access to another origin's resources is,
-unfortunately, insufficient in the face of speculative execution attacks like [[spectre]]. Merely
-_loading_ another origins' resource may be enough to bring its content into a memory space which
-may be probed by an attacker, even if the browser would otherwise prevent access to the resource
-through explicit channels.
+The goal of the existing opt-in is to block interesting data that an attacker
+wouldn't otherwise have access to from flowing into a process they control. It
+might be possible to obtain a similar result by minimizing the risk that
+outgoing requests will generate responses personalized to a specific user by
+extending [coep](https://html.spec.whatwg.org/multipage/origin.html#coep) to
+support a new `credentialless` mode which strips credentials (cookies, client
+certs, etc) by default for no-cors subresource requests. Let's explore that
+addition first, then look at whether it's Good Enough to enable cross-origin
+isolation.
 
-Given this context, user agents are rethinking the threat model under which they operate (e.g.
-[[chromium-post-spectre-rethink]]). It would be unfortunate indeed to prevent the web platform from
-legitimately using APIs like {{SharedArrayBuffer}} that accidentally improve attackers' ability to
-exploit speculation attacks, but at the same time, many user agents have agreed that it seems
-unreasonable to enable those APIs without additional mitigation.
+Subresource requests {#subresource-requests}
+--------------------
 
-The approach sketched out in this document tackles one piece of the broader problem by giving
-developers the ability to require an explicit opt-in from any resource which would be embedded in
-a given context. User agents can make that requirement a precondition for some APIs that might
-otherwise leak data about cross-origin resources, which goes some way towards ensuring that any
-leakage is voluntary, not accidental.
+In this new COEP variant, cross-origin no-cors subresource requests would be
+sent without credentials. Specific requests which require credentials can
+opt-into including them, at the cost of shifting the request's mode to require a
+[CORS check](https://fetch.spec.whatwg.org/#concept-cors-check) on the response.
+This bifurcation between credentiallessness and CORS means either that servers
+don't have browser-provided identifiers which could be used to personalize a
+response (see the isolation section below), or that they explicitly opt-in to
+exposing the response's content to the requesting origin.
 
-To that end, this proposal does three things:
+As an example, consider a developer who wishes to load an image into a context
+isolated in the way described above. The `<img>` element has a `crossorigin`
+attribute which allows developers to alter the outgoing request's state. In this
+new mode, the following table describes the outgoing request's properties in
+Fetch's terms for various values:
 
-1.  It introduces a new `cross-origin` value for the <a http-header>`Cross-Origin-Resource-Policy`</a>
-    HTTP response header, which constitutes an explicit declaration that a given resource may be
-    embedded in cross-origin contexts.
+<table class="data">
+  <thead>
+    <tr>
+      <td> Resource
+      <td> Request's [Mode](https://fetch.spec.whatwg.org/#concept-request-mode)
+      <td> Request's [Credentials Mode](https://fetch.spec.whatwg.org/#concept-request-credentials-mode)
+      <td> [includeCredentials](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch) <sub> COEP:unsafe-none</sub>
+      <td> [includeCredentials](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch) <sub> COEP:credentialless</sub>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`<img src="https://same-origin/">` 
+      <td>`same-origin` 
+      <td>`include` 
+      <td>`true` 
+      <td>`true`
+    </tr>
 
-2.  It introduces a new `Cross-Origin-Embedder-Policy` header which shifts the default behavior for
-    resources loaded in a given context to an opt-in model, in which cross-origin responses must
-    either assert a <a http-header>`Cross-Origin-Resource-Policy`</a> header which allows the
-    embedding, or pass a [=CORS check=].
+    <tr style="background-color:rgba(255,0,0,0.08)">
+      <td>`<img src="https://cross-origin/">` 
+      <td>`no-cors` 
+      <td>`include` 
+      <td>`true` 
+      <td><strong>`false`</strong>
+    </tr>
 
-3.  It extends <a http-header>`Cross-Origin-Resource-Policy`</a> to handle some <a>navigation
-    requests</a> in order to deal reasonably with <{iframe}> embeddings and
-    {{Window/open|window.open()}}.
+    <tr>
+      <td><code>&lt;img src="https://cross-origin/" <strong>crossorigin="anonymous"</strong>></code> 
+      <td>`no-cors` 
+      <td>`omit` 
+      <td>`false` 
+      <td>`false`
+    </tr>
 
-Together, these would allow a user agent to gate access to interesting APIs (like the aforementioned
-{{SharedArrayBuffer}}) on a top-level context opting-into `Cross-Origin-Embedder-Policy`, which in
-turn gives servers the ability to inspect incoming requests and make reasonable decisions about
-when to allow an embedding.
+    <tr>
+      <td><code>&lt;img src="https://cross-origin/" <strong>crossorigin="use-credentials"</strong>></code> 
+      <td>`cors` 
+      <td>`include` 
+      <td>`true` 
+      <td>`true`
+    </tr>
 
-The rest of this document monkey-patches [[HTML]] and [[Fetch]] in order to document the details of
-the bits and pieces discussed above.
+    </tbody>
+    </table>
+</div>
+
+### redirect ### {#redirect}
+
+The decision to include credentials is done indepently for each request. The
+variable
+[includeCredentials](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)
+is set for the initial request, but also after each redirect.
+
+For example, credentials are not included for a cross-origin no-cors request,
+but they can be added in the next request if it redirects to a same-origin
+resource.
+
+Main resource requests {#main-resource-request}
+----------------------
+
+Cross-origin nested navigational requests (`<iframe>`, etc) are more
+complicated, as they present risks different in kind from subresources. Frames
+create a browsing context with an origin distinct from the parent, which has
+implications on the data it has access to via requests on the one hand and
+storage APIs on the other. Given this capability, it seems clear that we can't
+just strip credentials from the nested navigational request and call it a day in
+the same way that we could with subresources.
+
+For this reason, `COEP:credentialless` must be as strict as `COEP:require-corp`
+for navigational requests. It works works identically.
+  
+That is to say:
+1. If the parent sets `COEP:credentialless` or `COEP:require-corp`, then the
+    children must also use `COEP:credentialless` or `COEP:require-corp`. If it
+    doesn't, its response is blocked by COEP. The two COEP values can be used
+    and mixed in any order.
+2. If the parent sets `COEP:credentialless` or `COEP:require-corp`, then the
+    children is required to specify a CORP header when it is cross-origin.
+
+Note: To help developers with embedding cross-origin `<iframe>` without
+opt-in from the embeddee, the [anonymous
+iframe](https://github.com/w3ctag/design-reviews/issues/639) project has been
+proposed. This is orthogonal to `COEP:credentialless`. The latter only deals
+with subresources of a single document.
+  
+CacheStorage requests {#cache-storage-request}
+---------------------
+  
+See the issue:
+[w3c/ServiceWorker/issues/1592](https://github.com/w3c/ServiceWorker/issues/1592)
+
+With CacheStorage's put() and match() methods, a response fetched from a
+`COEP:unsafe-none` context can be retrieved from a  `COEP:credentialless` or
+`COEP:require-corp` context.
+  
+Similarly to `COEP:require-corp`, the behavior of CacheStorage must be specified
+for `COEP:credentialless`.
+
+The solution proposed is to store the `includeCredentials` variable from the
+[HTTP-network-or-cache-fetch](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)
+algorithm into the response. Then during the [CORP
+check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check),
+to require CORP for opaque responses requested with credentials.
+
+Does `COEP:credentialless` support cross-origin isolation? {#cross-origin-isolation}
+----------------------------------------------------------
+
+Above, we asserted that the core goal of the existing opt-in requirement is to
+block interesting data that an attacker wouldn't otherwise have access to from
+flowing into a process they control. Removing credentials from outgoing requests
+seems like quite a reasonable way to deal with this for the kinds of requests
+which may vary based on browser-mediated credentials (cookies, client certs,
+etc). In these cases, `COEP:credentialless` would seem to substantially mitigate
+the risk of personalized data flowing into an attacker's process.
+
+Some servers, however, don't actually use browser-mediated credentials to
+control access to a resource. They may examine the network characteristics of a
+user's request (originating IP address, [relationship with the
+telco](https://datapass.de/), etc) in order to determine whether and how to
+respond; or they might not even be accessible to attackers directly, instead
+requiring a user to be in a privileged network position. These resources would
+continue to leak data in a credentialless model.
+
+Let's assert for the moment that servers accessible only via a privileged
+network position can be dealt with entirely by putting a wall between "public"
+and "private", along the lines of the [CORS and RFC1918
+proposal](https://wicg.github.io/cors-rfc1918/). Successfully rolling out that
+kind of model would address the threat of this kind of leakage, perhaps allowing
+us to hand-wave it away.
+
+IP-based authentication models are, on the other hand, more difficult to
+address. Though the practice is unfortunate in itself (users should have control
+over their state vis a vis servers they interact with on the one hand, and
+sensitive data should [assume a zero-trust
+network](https://cloud.google.com/beyondcorp) on the other), we know it's used
+in the wild for things like telco billing pages. In a credentialless isolation
+model, resources these servers expose would continue to flow into cross-origin
+processes unless and until they explicitly opted-out of that inclusion via CORP.
+We can minimize the risk of these attacks by increasing CORB's robustness on the
+one hand, and [requiring opt-in for embedded
+usage](https://goto.google.com/embedding-requires-consent) on the other.
+
+This leaves us with a tradeoff to evaluate: `COEP:credentialless` seems
+substantially easier than `COEP:require-corp` to deploy, both as an opt-in in
+the short-term, and (critically) as default behavior in the long term. It does
+substantially reduce the status quo risk. At the same time, it doesn't prevent a
+category of resources from flowing into attackers' processes. We have reasonable
+ideas about one chunk of these resources, and would simply not protect the other
+without explicit opt-in.
+
+Perhaps that's a tradeoff worth taking? The mechanism seems worth defining
+regardless, even if we don't end up considering it a fully cross-origin isolated
+context.
+
+The rest of this document monkey-patches [[HTML]] and [[Fetch]] in order to
+document the details of the bits and pieces discussed above.
 
 Integrations {#integrations}
 ============================
@@ -171,10 +302,10 @@ Integrations {#integrations}
 Integration with HTML {#integration-html}
 -----------------------------------------
 
-See also the corresponding pull request:
+This correspond to the following HTML specification change:
 [whatwg/html/pull/6638](https://github.com/whatwg/html/pull/6638).
 
-### Embedder policy value {#embedder-policy-value}
+### Embedder policy value ### {#embedder-policy-value}
 
 In the [embedder-policy-value](https://html.spec.whatwg.org/#embedder-policy-value) section, add the
 `credentialless` value:
@@ -185,7 +316,7 @@ In the [embedder-policy-value](https://html.spec.whatwg.org/#embedder-policy-val
 
   <dl>
 
-   <dt>"<dfn data-x="coep-unsafe-none" export for="embedder policy value"><code
+   <dt>"<dfn data-x="coep-unsafe-none" for="embedder policy value"><code
    data-x="">unsafe-none</code></dfn>"</dt>
    <dd><p>This is the default value. When this value is used, cross-origin resources can be fetched
    without giving explicit permission through the <span>CORS protocol</span> or the
@@ -197,7 +328,7 @@ In the [embedder-policy-value](https://html.spec.whatwg.org/#embedder-policy-val
    exchange, an explicit '<code>Cross-Origin-Resource-Policy</code>' on response is not required.
    </p></dd>
 
-   <dt>"<dfn data-x="coep-require-corp" export for="embedder policy value"><code
+   <dt>"<dfn data-x="coep-require-corp" for="embedder policy value"><code
    data-x="">require-corp</code></dfn>"</dt>
    <dd><p>When this value is used, fetching cross-origin resources requires the server's
    explicit permission through the <span>CORS protocol</span> or the
@@ -205,7 +336,7 @@ In the [embedder-policy-value](https://html.spec.whatwg.org/#embedder-policy-val
   </dl>
 </div>
 
-### Parsing {#parsing}
+### Parsing ### {#parsing}
 
 The [obtain-an-embedder-policy](https://html.spec.whatwg.org/#obtain-an-embedder-policy) step 4
 becomes:
@@ -240,14 +371,14 @@ becomes:
 </div>
 
 
-### `Compatible with crossOriginIsolated` algorithm {#compatible-with-cross-origin-isolated}
+### `Compatible with crossOriginIsolated` algorithm ### {#compatible-with-cross-origin-isolated}
 
 From the HTML specification point of view, `COEP:require-corp` and
 `COEP:credentialless` behave similarly. They differ in the fetch specification.
 They are referenced together with the `compatible with crossOriginIsolation`
 algorithm.
 
-<div algorithm="compatible with crossOriginIsolated">
+<div class="monkey-patch">
   <p>A <span data-x="embedder policy value">Cross-Origin-Embedder-Policy value</span> is
   <dfn>compatible with crossOriginIsolation</dfn> following this table</p>
 
@@ -292,30 +423,39 @@ Then replace every occurence of:
   </tbody>
 </table>
 
-(10 occurences)
+There are 10 occurences to be replaced. In particular:
+1. COEP:credentialless can be used to enable crossOriginIsolation, the same way
+    COEP:require-corp does.
+2. If a document has a COEP policy compatible with crossOriginIsolation, then the
+    documents loaded in its `<iframe>` must also have a COEP policy compatible
+    with crossOriginIsolation, or they are blocked.
 
 Integration with Fetch {#integration-fetch}
--------------------------------------------
+----------------------
 
-### Omit credentials for no-cors cross-origin requests.
+See the corresponding fetch specification
+This correspond to the following Fetch specification change:
+[whatwg/fetch/pull/1229](https://github.com/whatwg/fetch/pull/1229)
+
+### Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}
 
 Add the following algorithm:
 
-<div algorithm="coep-allows-credentials">
+<div class="monkey-patch">
   <p>To check <dfn export>Cross-Origin-Embedder-Policy allows credentials</dfn>, given a
-  <a for=/>request</a> <var>request</var>, run theses steps:
+  <a for=/>request</a> <var ignore="">request</var>, run theses steps:
 
   <ol>
-   <li><p>If <var>request</var>'s <a for=request>mode</a> is not <code>no-cors</code>", return
+   <li><p>If <var ignore="">request</var>'s <a for=request>mode</a> is not <code>no-cors</code>", return
    true.</p>
 
-   <li><p>If <var>request</var>'s <a for=request>client</a> is null, return true.</p>
+   <li><p>If <var ignore="">request</var>'s <a for=request>client</a> is null, return true.</p>
 
-   <li><p>If <var>request</var>'s <a for=request>client</a>'s <a for="environment settings
+   <li><p>If <var ignore="">request</var>'s <a for=request>client</a>'s <a for="environment settings
    object">embedder policy</a> is not
    "<code><a for="embedder policy value">credentialless</a></code>", return true.</p>
 
-   <li><p>If <var>request</var>'s <a for=request>origin</a> is not <a>same origin</a> with
+   <li><p>If <var ignore="">request</var>'s <a for=request>origin</a> is not <a>same origin</a> with
    <var>request</var>'s <a for=request>client</a>'s <a for="environment settings object">origin</a>,
    return true.</p>
 
@@ -326,17 +466,17 @@ Add the following algorithm:
 Then, use it in the step 8.4. of the [HTTP-network-or-cache
 fetch](https://fetch.spec.whatwg.org/#concept-http-network-or-cache-fetch)
 algorithm:
-<div algorithm="HTTP-network-cache fetch">
+<div class="monkey-patch">
   <p>If <a>Cross-Origin-Embedder-Policy allows credentials</a> with
   <var>request</var> is false, set <var>includeCredentials</var> to false.</p>
 </div>
 
-### Cross-Origin-Resource-Policy internal check
+### Cross-Origin-Resource-Policy internal check ### {#corp-internal-check}
 
 Modify the step 5. from the the
 [cross-origin-resource-policy-internal-check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check)
 
-<div algorithm="cross-origin-resource-internal-check">
+<div class="monkey-patch">
  <p>5. If <var>policy</var> is null, switch on <var>embedderPolicyValue</var>:
   <dl class=switch>
    <dt>"<a for="embedder policy value">unsafe-none</a>"
@@ -349,11 +489,11 @@ Modify the step 5. from the the
     <li><var>response</var>'s <a for="response">request-include-credentials</a> is true and
         <var>response</var>'s <a for="response">type</a> is "<code>opaque</code>".
 
-    Note: This part is explained in the CacheStorage section.
+    Note: Explained in the [cache-storage-request](#cache-storage-request) section.
 
     <li><var>forNavigation</var> is true.
 
-    Note: This part is explained in the Navigation section.
+    Note: Explained in the [main-resource-request](#main-resource-request) section.
    </ul>
 
    <dt>"<a for="embedder policy value">require-corp</a>"
@@ -379,459 +519,10 @@ This section is made to
 id=concept-response-request-include-credentials>request-include-credentials</dfn>, which is
 initially set.
 
-
-When creating a document, user agents will process
-<a http-header>`Cross-Origin-Embedder-Policy`</a> headers delivered by the server, imposing any
-restrictions it asserts. Likewise, user agents MUST also take into account the embedder policy
-asserted by the document's opener or embedder, ensuring that they're properly imposed as well. To do
-so, HTML is patched as follows:
-
-1.  An <dfn>embedder policy</dfn> consists of:
-
-    1.  A string (<dfn for="embedder policy">value</dfn>) with one of the following values:
-        "`unsafe-none`", "`require-corp`", initially "`unsafe-none`".
-
-    1.  A string or `null` (<dfn for="embedder policy">reporting endpoint</dfn>), initially `null`.
-
-    1.  A string (<dfn for="embedder policy">report only value</dfn>) with one of the following
-        values: "`unsafe-none`", "`require-corp`", initially "`unsafe-none`".
-
-    1.  A string or `null` (<dfn for="embedder policy">report only reporting endpoint</dfn>),
-        initially `null`.
-
-2.  The [=/embedder policy=] is persisted on a number of objects:
-
-    1.  {{Document}} objects are given an <dfn for="document">embedder policy</dfn> property, whose
-        value is an [=/embedder policy=].
-
-    2.  {{WorkerGlobalScope}} objects are given a <dfn for="WorkerGlobalScope">embedder
-        policy</dfn> property, whose value is an [=/embedder policy=].
-
-    3.  [=Environment settings objects=] are given a <dfn for="environment settings object">embedder
-        policy</dfn> accessor, which has the following implementations:
-
-        :   For {{Window}} objects:
-        ::  Return the [=document/embedder policy=] of <var ignore>window</var>'s
-            [=associated Document=].
-        :   For {{WorkerGlobalScope}} objects:
-        ::  Return <var ignore>worker global scope</var>'s [=WorkerGlobalScope/embedder policy=].
-
-3.  The [$create a new browsing context$] algorithm sets the [=document/embedder policy=] for
-    a browsing context's initial `about:blank` document by adding a new step directly after Referrer
-    Policy is initialized in step 11 of the existing algorithm  which will copy any
-    <var ignore>creator</var> document's policy:
-
-        > 12.  If <var ignore>creator</var> is not null, set <var ignore>document</var>'s
-        >      [=document/embedder policy=] to <var ignore>creator</var>
-        >      [=document/embedder policy=].
-
-4.  The [$initialize the Document object$] algorithm sets the [=document/embedder policy=] for
-    {{Document}}s to which a [=browsing context=] is navigated by adding a new step directly after
-    Referrer Policy is initialized in step 6:
-
-    > 7.  Let <var ignore>document</var>'s [=document/embedder policy=] be the result of
-    >     [$parse header|obtaining an embedder policy$] from |response|.
-
-5.  The [$run a worker$] algorithm sets the [=WorkerGlobalScope/embedder policy=] for
-    {{WorkerGlobalScope}} objects by adding new steps directly after Referrer Policy is initialized
-    in step 12.5:
-
-    > 6.  Call [$initialize a global object's embedder policy from a response$] given
-    >     <var ignore>worker global scope</var> and <var ignore>response</var>.
-    >
-    > 7.  If the result of [$check a global object's embedder policy$] given
-    >     <var ignore>worker global scope</var>, <var ignore>owner</var> and
-    >     <var ignore>request</var> is "`blocked`", then set |response| to a [=network error=].
-
-6.  The [$process a navigate fetch$] algorithm runs the [$cross-origin resource policy check$] for
-    navigation for nested browsing contexts by adding the following step before step 6:
-
-    > 6.  If |browsingContext| is a [=child browsing context=]:
-    >
-    >     1.  Let |parent| be |browsingContext|'s [=parent browsing context=].
-    >
-    >     2.  Let |requestForCORPCheck| be a copy of |request|.
-    >
-    >     3.  Set |requestForCORPCheck|'s origin to |parent|'s origin.
-    >
-    >     4.  Set |requestForCORPCheck|'s client to |parent|'s [=active document=].
-    >
-    >     5.  If the result of [$cross-origin resource policy check$] with |requestForCORPCheck| and
-    >         |response| is `blocked`, then set |response| to a [=network error=].
-    >
-    >         Note: Here we're running the [$cross-origin resource policy check$] against the
-    >         [=parent browsing context=] rather than |sourceBrowsingContext|. This is because we do
-    >         care about the same-originness of the embedded content against the parent context, not
-    >         the navigation source.
-
-7.  The [$process a navigate response$] algorthm checks that documents nested in a `require-corp`
-    context themselves positively assert `require-corp` by adding a new condition to the list in
-    step 1:
-
-    > *   The [$process navigation response|check a navigation response's adherence to its
-    >     embedder's policy$] algorithm returns "`Blocked`" when executed upon
-    >     <var ignore>response</var> and <var ignore>browsingContext</var>.
-
-
-### Initializing a global object's Embedder policy ### {#initialize-embedder-policy-for-global}
-
-<div algorithm="to initialize a global object's embedder policy from a response">
-To <dfn abstract-op>initialize a global object's embedder policy from a response</dfn>, given a
-[=global object=] (|global|) and a [=response=] (|response|):
-
-1.  Let |policy| be a new [=/embedder policy=].
-
-2.  Let |response policy| be the result of [$parse header|obtaining an embedder policy$] from
-    |response|.
-
-3.  If |response|'s [=response/url=]'s [=url/scheme=] is a [=local scheme=]:
-
-    1.  For each of the items in |global|'s [=WorkerGlobalScope/owner set=]:
-
-            1.  If the item's [=/embedder policy=]'s [=embedder policy/value] is "`require-corp`",
-                then set |policy|'s [=embedder policy/value] to "`require-corp`".
-
-            2.  If |policy|'s [=embedder policy/reporting endpoint] is `null` and the item's
-                [=embedder policy/reporting endpoint=] is non-null, then |policy|'s
-                [=embedder policy/reporting endpoint=] to the item's
-                [=embedder policy/reporting endpoint=].
-
-            3.  If the item's [=/embedder policy=]'s [=embedder policy/report only value] is
-                "`require-corp`", then set |policy|'s [=embedder policy/value] to "`require-corp`".
-
-            4.  If |policy|'s [=embedder policy/report only reporting endpoint] is `null` and the
-                item's [=embedder policy/report only reporting endpoint=] is non-null, then
-                |policy|'s [=embedder policy/report only reporting endpoint=] to the item's
-                [=embedder policy/report only reporting endpoint=].
-4.  Otherwise:
-
-    1.   Set |policy| to |response policy|.
-
-5.  Set |global|'s [=WorkerGlobalScope/embedder policy=] to |policy|.
-
-### Checking a global object's Embedder policy ### {#check-embedder-policy-for-global}
-
-<div algorithm="to queu a coep worker violation">
-To <dfn abstract-op lt="queue coep worker violation">Queue a Cross-Origin Embedder Policy
-violation on worker initialization</dfn> given a [=request=] (|request|), a string (|endpoint|) and an
-[=environment settings object=] (|settings|), run the following steps:
-
-1.  Let |blocked url| be |request|'s [=request/URL=].
-
-    Note: This is not |request|'s [=request/current URL=] in order to avoid leaking information
-    about redirect targets (see https://w3c.github.io/webappsec-csp/#security-violation-reports).
-
-2.  Set |blocked url|'s [=url/username=] to the empty string, and its [=url/password=] to `null`.
-
-3.  Set |serialized blocked url| be the result of executing the
-    [URL serializer](https://url.spec.whatwg.org/#concept-url-serializer) on |blocked url|
-    with the |exclude fragment flag| set.
-
-4.  Let |body| be a new object containing the following properties with keys:
-
-    * key: "`type`", "`worker initialization`".
-    * key: "`blocked-url`", value: |serialized blocked url|.
-
-5.  [Queue](https://w3c.github.io/reporting/#queue-report) |body| as "`coep`" for
-    |endpoint| on |settings|.
-
-</div>
-
-<div algorithm="to check a global object's embedder policy">
-To <dfn abstract-op>check a global object's embedder policy</dfn>, given a [=global object=]
-(|global|), a [=environment settings object=] (|owner|) and a [=request=] (|request|), then
-
-1.  If |global| is a {{SharedWorkerGlobalScope}} or |global| is a {{ServiceWorkerGlobalScope}}, then
-    return "`allowed`".
-
-2.  Let |owner policy| be |owner|'s [=environment settings object/embedder policy=].
-
-3.  If |owner policy|'s [=embedder policy/report only value=] is "`require-corp`" and
-    |owner policy|'s [=embedder policy/report only reporting endpoint=] is not null and
-    |response policy|'s [=embedder policy/value=] is "`unsafe-none`", then [$queue coep worker
-    violation|queue a Cross-Origin Embedder Policy vioalation on worker initialization$] with
-    |request|, |owner policy|'s [=embedder policy/report only reporting endpoint=] and |owner|.
-
-4.  If |owner policy|'s [=embedder policy/value=] is "`require-corp`" and |child policy|'s
-       [=embedder policy/value=] is "`unsafe-none`":
-
-    1.  If |owner policy|'s [=embedder policy/reporting endpoint=] is not null, then [$queue coep
-        worker violation|queue a Cross-Origin Embedder Policy vioalation on worker initialization$]
-        with |request|, |owner policy|'s [=embedder policy/reporting endpoint=] and |owner|.
-
-    2.  Return "`blocked`".
-
-5.  Return "`allowed`".
-
-</div>
-
-### Process a navigation response ### {#process-navigation-response}
-
-<div algorithm="process a navigation response">
-If a document's [=document/embedder policy=] is "`require-corp`", then any document it embeds in a
-[=nested browsing context=] must positively assert a "`require-corp`" [=/embedder policy=] (see
-[[#cascade-vs-require]]).
-
-To <dfn abstract-op lt="queue coep navigation violation">Queue a Cross-Origin Embedder Policy
-violation on navigation</dfn> given a [=request=] (|request|), a string (|endpoint|) and an
-[=environment settings object=] (|settings|), run the following steps:
-
-1.  Let |blocked url| be |request|'s [=request/URL=].
-
-    Note: This is not |request|'s [=request/current URL=] in order to avoid redirect
-    information leak.
-
-2.  Set |blocked url|'s [=url/username=] to the empty string, and its [=url/password=] to `null`.
-
-3.  Set |serialized blocked url| be the result of executing the
-    [URL serializer](https://url.spec.whatwg.org/#concept-url-serializer) on |blocked url|
-    with the |exclude fragment flag| set.
-
-4.  Let |body| be a new object containing the following properties with keys:
-
-    * key: "`type`", "`navigation`".
-    * key: "`blocked-url`", value: |serialized blocked url|.
-
-5.  [Queue](https://w3c.github.io/reporting/#queue-report) |body| as "`coep-navigation`" for
-    |endpoint| on |settings|.
-
-To <dfn abstract-op lt="process navigation response">check a navigation response's adherence to its
-embedder's policy</dfn> given a [=request=] (|request|), a [=response=] (|response|), and a target
-[=browsing context=] (|target|), execute the following steps, which will return "`Allowed`" or
-"`Blocked`" as appropriate:
-
-1.  Return "`Allowed`" if |target| is not a [=child browsing context=].
-
-2.  Let |response policy| be the result of [$parse header|obtaining an embedder policy$] from
-    |response|.
-
-3.  Let |parent policy| be |target|'s [=container document=]'s [=document/embedder policy=].
-
-4.  If |parent policy|'s [=embedder policy/report only value=] is "`require-corp`" and
-    |parent policy|'s [=embedder policy/report only reporting endpoint=] is not null and
-    |response policy|'s [=embedder policy/value=] is "`unsafe-none`", then [$queue coep navigation
-    violation|queue a Cross-Origin Embedder Policy vioalation on navigation$] with |request|,
-    |parent policy|'s [=embedder policy/report only reporting endpoint=] and |target|'s
-    [=container document=].
-
-5.  If |parent policy|'s [=embedder policy/value=] is "`require-corp`" and |child policy|'s
-       [=embedder policy/value=] is "`unsafe-none`":
-
-    1.  If |parent policy|'s [=embedder policy/reporting endpoint=] is not null, then [$queue coep
-        navigation violation|queue a Cross-Origin Embedder Policy vioalation on navigation$] with
-        |request|, |parent policy|'s [=embedder policy/reporting endpoint=] and |target|'s
-        [=container document=].
-
-    2.  Return "`Blocked`".
-
-6.  Return "`Allowed`".
-
-</div>
-
-Integration with Fetch {#integration-fetch}
--------------------------------------------
-
-When fetching resources, user agents should examine both the [=request=]'s [=request/client=] and
-[=request/reserved client=] to determine the applicable [=/embedder policy=], and apply any constraints that policy expresses
-to incoming responses. To do so, Fetch is patched as follows:
-
-1.  The `Cross-Origin-Resource-Policy` grammar is extended to include a "`cross-origin`" value.
-
-2.  The [$cross-origin resource policy check$] is rewritten to take the [=/embedder policy=] into
-    account, and to cover some [=navigation requests=] in addition to `no-cors` requests.
-
-### Cross-Origin Resource Policy Checks ### {#corp-check}
-
-To perform a <dfn abstract-op>cross-origin resource policy internal check</dfn> given a string
-(|embedder policy value|), a [=request=] (|request|) and a [=response=] (|response|), run these
-steps:
-
-1.  Return `allowed` if |request|'s [=request/mode=] is "`same-origin`", "`cors`", or "`websocket`".
-
-2.  If |request|'s mode is "`navigate`":
-
-    1.  ASSERT: This algorithm will only be called when |request| targets a nested
-        browsing context; therefore, its [=request/destination=] is either "`frame`",
-        "`iframe`", "`embed`", or "`object`".
-
-        Note: This relies on [whatwg/fetch/#948](https://github.com/whatwg/fetch/pull/948).
-
-    2.  If |embedder policy value| is "`unsafe-none`", then return `allowed`.
-
-3.  Let |policy| be the result of [=header list/getting=] `Cross-Origin-Resource-Policy` from
-    |response|'s [=response/header list=].
-
-4.  If |policy| is `null` and |embedder policy value| is "`require-corp`",
-    then set |policy| to "`same-origin`".
-
-5.  Switch on |policy| and run the associated steps:
-
-    :   `null`
-    :   `cross-origin`
-    ::  Return `allowed`.
-
-    :   `same-origin`
-    ::  If |request|'s [=request/origin=] is [=same origin=] with |request|'s
-        [=request/current URL=]'s [=url/origin=], then return `allowed`.
-
-        Otherwise, return `blocked`.
-
-    :   `same-site`
-    ::  If both of the following statements are true, then return `allowed`:
-
-        *   |request|'s [=request/origin=]'s [=origin/host=] is [=same site=] with |request|'s
-            [=request/current URL=]'s [=url/origin=]'s [=origin/host=].
-        *   |request|'s [=request/origin=]'s [=origin/scheme=] is "`https`", or |response|'s
-            [=response/HTTPS state=] is "`none`".
-
-        Otherwise, return `blocked`.
-
-        Note: `Cross-Origin-Resource-Policy: same-site` does not consider a response delivered
-        via a secure transport to match a non-secure requesting origin, even if their hosts are
-        otherwise [=same site=]. Securely-transported responses will only match a
-        securely-transported initiator.
-
-    :   Otherwise
-    ::  Return `allowed`.
-
-        ISSUE: Anne suggested that we ought to fail closed instead in the presence of COEP in
-        [a comment on the relevant PR](https://github.com/whatwg/fetch/pull/893#discussion_r274867414).
-        That seems reasonable to me, if we can get some changes into CORP along the lines of
-        [whatwg/fetch#760](https://github.com/whatwg/fetch/issues/760), as they seem like useful
-        extensions, and I think it'll be more difficult to ship them after inverting the
-        error-handling behavior.
-
-To perform a <dfn abstract-op>cross-origin resource policy check</dfn> given a [=request=]
-(|request|) and a [=response=] (|response|), run these steps:
-
-1.  Let |embedder policy| be |request|'s [=request/client=]'s
-    [=environment settings object/embedder policy=].
-
-2.  If |request|'s [=request/reserved client=] is not `null`, then set |embedder policy|
-    to a new [=/embedder policy=].
-
-3.  If |embedder policy|'s [=embedder policy/report only reporting endpoint=] is not `null` and the
-    result of running [$cross-origin resource policy internal check] with
-    [=embedder policy/report only value=], |request| and |response| is `blocked`, then run these
-    steps:
-
-    1.  Let |blocked url| be |request|'s [=request/URL=].
-
-    2.  Set |blocked url|'s [=url/username=] to the empty string, and its [=url/password=] to
-        `null`.
-
-    3.  Set |serialized blocked url| be the result of executing the
-        [URL serializer](https://url.spec.whatwg.org/#concept-url-serializer) on |blocked url| with
-        the |exclude fragment flag| set.
-
-    4.  Let |body| be a new object containing the following properties with keys:
-
-        * key: "`type`", value: "`corp`".
-
-        * key: "`blocked-url`", value: |serialized blocked url|.
-
-    5.  [Queue](https://w3c.github.io/reporting/#queue-report) |body| as "`coep`" for
-        |embedder policy|'s [=embedder policy/report only reporting endpoint=] on |request|'s
-        [=request/client=].
-
-4.  Let |result| be the result of running [$cross-origin resource policy internal check$] with
-    [=embedder policy/value=], |request| and |response|.
-
-5.  If |embedder policy|'s [=embedder policy/reporting endpoint=] is not `null` and |result| is
-    `blocked`, then run these steps:
-
-    1.  Let |blocked url| be |request|'s [=request/URL=].
-
-    2.  Set |blocked url|'s [=url/username=] to the empty string, and its [=url/password=] to `null`.
-
-    3.  Set |serialized blocked url| be the result of executing the
-        [URL serializer](https://url.spec.whatwg.org/#concept-url-serializer) on |blocked url| with
-        the |exclude fragment flag| set.
-
-    4.  Let |body| be a new object containing the following properties with keys:
-
-        * key: "`type`", value: "`corp`".
-
-        * key: "`blocked-url`", value: |serialized blocked url|.
-
-    5.  [Queue](https://w3c.github.io/reporting/#queue-report) |body| as "`coep`" for
-        |embedder policy|'s [=embedder policy/reporting endpoint=] on |request|'s
-        [=request/client=].
-
-6.  Return |result|.
-
-Integration with Service Worker {#integration-sw}
--------------------------------------------------
-
-In https://w3c.github.io/ServiceWorker/#dom-fetchevent-respondwith, replace 10.1 with the following
-items.
-
-1.  If |response| is not a `Response` object, or _event_'s request's associated request's
-    [=request/mode=] is "`no-cors`" and the result of performing a
-    [$cross-origin resource policy check$] with _event_'s request's associated request and
-    _response_'s associated response is `blocked`, then set the respond-with-error flag.
-
-Also add the following note.
-
-The [$cross-origin resource policy check$] performed here ensures that a Service Worker
-cannot respond to a client that requires CORP with an opaque response that doesn't assert CORP.
-
-Implementation Considerations {#impl-considerations}
-====================================================
-
-Why not require CORS instead? {#why-not-cors}
----------------------------------------------
-
-An earlier version of this propsal leaned on CORS rather than CORP. Why didn't we run with that
-model instead?
-
-This proposal posits that there's a meaningful distinction between a server's assertions that "You,
-vague acquaintance, may embed me." and "You, dearest friend, may read me."
-`Cross-Origin-Resource-Policy` grants no explicit access to a resources' content, unlike CORS, and
-seems like it's just good-enough to support the explicit declaration of embeddableness that this
-proposal requires. CORS goes further, and especially in the short-term it seems that there's real
-risk in developers blindly enabling CORS in order to meet the embedding requirements we want to
-impose here, opening themselves up to direct attack in the process.
-
-That is, it seems likely that some subset of developers would implement a CORS requirement in the
-simplest way possible, by reflecting the `Origin` header in an `Access-Control-Allow-Origin` header.
-If these resources contain interesting data about users (as advertisements, for example, are wont to
-do), then it's possible that data will end up being more widely available than expected.
-
-CORP does not create the same risk. It seems strictly lower-privilege than CORS, and a reasonable
-place for us to start.
-
-Forward-compatibility {#forward-compat}
----------------------------------------
-
-The header defined in this document is small and single-purpose, which is a real advantage for
-comprehensibility. I wonder, however, if an extensible alternative would be reasonable. For
-example, if we're serious about moving to credentialless requests, it would be annoying to do so by
-defining yet another header. Perhaps something more generic that accepts a
-[=structured header/dictionary=] rather than a single token? That is:
-
-```
-Embedee-Policy: opt-in=required, credentials=cors-only
-```
-
-Perhaps it will be possible to do everything we want by defining a new tokens, but I worry a bit
-that we'll follow [[Referrer-Policy]] into some pretty convoluted token names if we go that route.
-Splitting out the axes along which we'd like to make decisions seems like it might be a good
-strategy to consider.
-
-Cascading vs. requiring embedder policies {#cascade-vs-require}
----------------------------------------------------------------
-
-An earlier version of this proposal called for a nested document's [=document/embedder policy=] to
-be inherited from its parent. This would ensure that a document that asserted `require-corp` would
-require its framed children to do the same.
-
-We decided that this is the wrong model to start with. Instead, we now require the framed document
-itself to assert `Cross-Origin-Embedder-Policy: require-corp`, and block the load if it doesn't.
-That seems safer, insofar as it would give the embedder less control over the embedee's state. It
-also ensures that the embedee's developer would always see consistent behavior in the given document
-no matter whether its loaded as a frame or as a top-level document.
-
-This might be a requirement we can relax in the future, as it does have potential implications for
-eventual deployment. It makes sense to begin with the requirement, however, as loosening constraints
-is significantly simpler than imposing new constraints in the future.
+Integration with ServiceWorker {#integration-service-worker}
+------------------------------------------------------------
+
+There are no change to the ServiceWorker specification. The CacheStorage issue:
+[w3c/ServiceWorker/issues/1592](https://github.com/w3c/ServiceWorker/issues/1592)
+is entirely resolved by modifying the CORP internal check from the Fetch
+specification.
