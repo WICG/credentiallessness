@@ -12,14 +12,16 @@ Markup Shorthands: markdown yes
 Canonical URL: https://html.spec.whatwg.org/#coep-credentialless
 !Version History: <a href="https://github.com/WICG/cross-origin-embedder-policy-credentialless/">WICG/coep-credentialless</a>
 Issue Tracking: whatwg/html topic: coep-credentialless https://github.com/whatwg/html/labels/topic%3A%20coep-credentialless
-Issue Tracking: w3c/html topic: coep-credentialless https://github.com/w3c/ServiceWorker/labels/topic%3A%20coep-credentialless
+Issue Tracking: w3c/ServiceWorker topic: coep-credentialless https://github.com/w3c/ServiceWorker/labels/topic%3A%20coep-credentialless
 Boilerplate: repository-issue-tracking off
 Abstract:
-    credentialless is a new value for the Cross-Origin-Embedder-Policy (COEP).
-    Similarly to require-corp, it can be used to enable cross-origin-isolation.
-    It is easier to deploy. Instead of requiring a CORP header for every
-    no-cors subresources, COEP:credentialless is requesting them without
-    credentials like cookies.
+    Credentialless is a Cross-Origin-Embedder-Policy (COEP) variant. Similarly
+    to
+    [require-corp](https://html.spec.whatwg.org/multipage/origin.html#embedder-policy-value),
+    it can be used to enable [cross-origin-isolation](#cross-origin-isolation).
+    Contrary to require-corp, it is easier to deploy, instead of requiring a
+    Cross-Origin-Resource-Policy (CORP) header for every no-cors subresources,
+    COEP:credentialless is requesting them without credentials.
 </pre>
 <pre boilerplate="copyright">&copy;2021, Google, Inc. All rights reserved.</pre>
 
@@ -79,6 +81,7 @@ spec:fetch; type:dfn; for:/; text:request
 spec:fetch; type:dfn; for:/; text:coep-require-corp
 spec:fetch; type:dfn; for:/; text:response
 spec:fetch; type:dfn; for:/; text:embedderPolicyValue
+spec:fetch; type:dfn; for:/; text:embedder-policy-value
 spec:fetch; type:dfn; for:/; text:embedderPolicy
 spec:fetch; type:dfn; text: cors check
 spec:html; type:dfn; for:/; text:browsing context
@@ -230,7 +233,7 @@ Note: To help developers with embedding cross-origin `<iframe>` without
 opt-in from the embeddee, the [anonymous
 iframe](https://github.com/w3ctag/design-reviews/issues/639) project has been
 proposed. This is orthogonal to `COEP:credentialless`. The latter only deals
-with subresources of the document using this policy.
+with subresources, not `<iframe>`.
 
 CacheStorage requests {#cache-storage-request}
 ---------------------
@@ -251,7 +254,7 @@ algorithm into the response. Then during the [CORP
 check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check),
 to require CORP for opaque responses requested with credentials.
 
-Does `COEP:credentialless` support cross-origin isolation? {#cross-origin-isolation}
+Cross-origin Isolation {#cross-origin-isolation}
 ----------------------------------------------------------
 
 Above, we asserted that the core goal of the existing opt-in requirement is to
@@ -384,14 +387,13 @@ becomes:
 ### `Compatible with crossOriginIsolation` algorithm ### {#compatible-with-cross-origin-isolation}
 
 `COEP:credentialess` and `COEP:require-corp` differ in the Fetch specification.
-
 However, from the HTML specification point of view, they behave similarly. They
 are referenced together with the `compatible with crossOriginIsolation`
 algorithm.
 
 <div class="monkey-patch">
   <p>A <span data-x="embedder policy value">Cross-Origin-Embedder-Policy value</span> is
-  <dfn>compatible with crossOriginIsolation</dfn> following this table</p>
+  <dfn export>compatible with crossOriginIsolation</dfn> following this table</p>
 
   <table class="data">
    <thead>
@@ -439,12 +441,11 @@ There are 10 occurences to be replaced. In particular:
     COEP:require-corp does.
 2. If a document has a COEP policy compatible with crossOriginIsolation, then the
     documents loaded in its `<iframe>` must also have a COEP policy compatible
-    with crossOriginIsolation, or they are blocked.
+    with crossOriginIsolation, or be blocked.
 
 Integration with Fetch {#integration-fetch}
 ----------------------
 
-See the corresponding fetch specification
 This correspond to the following Fetch specification change:
 [whatwg/fetch/pull/1229](https://github.com/whatwg/fetch/pull/1229)
 
@@ -511,7 +512,7 @@ Modify the step 5. from the
 [cross-origin-resource-policy-internal-check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check)
 
 <div class="monkey-patch">
- <p>5. If <var>policy</var> is null, switch on <var>embedderPolicyValue</var>:
+ <p>5. If <var>policy</var> is null, switch on <var ignore="">embedderPolicyValue</var>:
   <dl class=switch>
    <dt>"<a for="embedder policy value">unsafe-none</a>"
    <dd> Do nothing.
@@ -525,7 +526,7 @@ Modify the step 5. from the
 
     Note: See the [cache-storage-request](#cache-storage-request) requirement.
 
-    <li><var>forNavigation</var> is true.
+    <li><var ignore="">forNavigation</var> is true.
 
     Note: See the [main-resource-request](#main-resource-request) requirement.
    </ul>
@@ -547,9 +548,9 @@ Fetch specification.
 Security and privacy considerations {#security-and-privacy}
 ===================================
 
-This allow embedding cross-origin resources with no explicit opt-in into a
+This allows embedding cross-origin resources with no explicit opt-in into a
 cross-origin isolated process. This process has access to powerful
 features like SharedArrayBuffer or precise timers. An attacker can exploit
 [[Spectre]] more easily. The attacker can potentially read the whole process
-memory and access those resources. This concern has been addressed in the
+memory and read those resources. This concern has been addressed in the
 [cross-origin-isolation](#cross-origin-isolation) section.
