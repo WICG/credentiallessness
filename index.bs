@@ -3,10 +3,10 @@ Title: Cross-Origin-Embedder-Policy: credentialless
 Shortname: coep
 Level: 1
 Status: DREAM
-Editor: Arthur Sonzogni, Google Inc., arthursonzogni@google.com
-Editor: Camille Lamy, Google Inc., clamy@google.com
-Editor: Ian Clelland, Google Inc., iclelland@google.com
-Editor: Mike West, Google Inc., mkwst@google.com
+Editor: Arthur Sonzogni, Google, arthursonzogni@google.com
+Editor: Camille Lamy, Google, clamy@google.com
+Editor: Ian Clelland, Google, iclelland@google.com
+Editor: Mike West, Google, mkwst@google.com
 
 Markup Shorthands: markdown yes
 Canonical URL: https://html.spec.whatwg.org/#coep-credentialless
@@ -16,17 +16,22 @@ Issue Tracking: w3c/html topic: coep-credentialless https://github.com/w3c/Servi
 Boilerplate: repository-issue-tracking off
 Abstract:
     credentialless is a new value for the Cross-Origin-Embedder-Policy (COEP).
-    Similarly to require-corp, it can be used to enable cross-origin-isolation,
-    but is easier to deploy.
-
-    Instead of requiring a CORP header for every no-cors subresources,
-    COEP:credentialless is requesting them without credentials (Cookies, Client
-    certificates, etc...).
+    Similarly to require-corp, it can be used to enable cross-origin-isolation.
+    It is easier to deploy. Instead of requiring a CORP header for every
+    no-cors subresources, COEP:credentialless is requesting them without
+    credentials like cookies.
 </pre>
 <pre boilerplate="copyright">&copy;2021, Google, Inc. All rights reserved.</pre>
 
 <pre class="biblio">
 {
+  "spectre": {
+    "authors": [
+      "Paul Kocher", "Jann Horn", "Anders Fogh", "Daniel Genkin", "Daniel Gruss", "Werner Haas", "Mike Hamburg", "Moritz Lipp", "Stefan Mangard", "Thomas Prescher", "Michael Schwarz", "Yuval Yarom"
+    ],
+    "href": "https://spectreattack.com/spectre.pdf",
+    "title": "Spectre Attacks: Exploiting Speculative Execution"
+  }
 }
 </pre>
 
@@ -73,6 +78,8 @@ spec:fetch; type:dfn; for:/; text:network error
 spec:fetch; type:dfn; for:/; text:request
 spec:fetch; type:dfn; for:/; text:coep-require-corp
 spec:fetch; type:dfn; for:/; text:response
+spec:fetch; type:dfn; for:/; text:embedderPolicyValue
+spec:fetch; type:dfn; for:/; text:embedderPolicy
 spec:fetch; type:dfn; text: cors check
 spec:html; type:dfn; for:/; text:browsing context
 spec:html; type:dfn; for:/; text:container document
@@ -83,7 +90,7 @@ spec:html; type:dfn; text:environment
 spec:url; type:dfn; for:/; text:url
 </pre>
 
-A Problem {#problem}
+A problem {#problem}
 ====================
 
 Sites that wish to continue using SharedArrayBuffer must opt-into cross-origin
@@ -108,7 +115,7 @@ any opt-in mechanism is going to be limited. From a deployment perspective
 if we could find an approach that provided robust-enough protection against
 accidental cross-process leakage without requiring an explicit opt-in.
 
-A Proposal {#proposal}
+A proposal {#proposal}
 ==========
 
 The goal of the existing opt-in is to block interesting data that an attacker
@@ -223,8 +230,8 @@ Note: To help developers with embedding cross-origin `<iframe>` without
 opt-in from the embeddee, the [anonymous
 iframe](https://github.com/w3ctag/design-reviews/issues/639) project has been
 proposed. This is orthogonal to `COEP:credentialless`. The latter only deals
-with subresources of a single document.
-  
+with subresources of the document using this policy.
+
 CacheStorage requests {#cache-storage-request}
 ---------------------
   
@@ -294,6 +301,8 @@ Perhaps that's a tradeoff worth taking? The mechanism seems worth defining
 regardless, even if we don't end up considering it a fully cross-origin isolated
 context.
 
+-------
+
 The rest of this document monkey-patches [[HTML]] and [[Fetch]] in order to
 document the details of the bits and pieces discussed above.
 
@@ -311,7 +320,7 @@ This correspond to the following HTML specification change:
 In the [embedder-policy-value](https://html.spec.whatwg.org/#embedder-policy-value) section, add the
 `credentialless` value:
 
-<div algorithm="embedder policy value">
+<div class="monkey-patch">
   <p>An <dfn export>embedder policy value</dfn> controls the fetching of cross-origin resources
   without explicit permission from resource owners. There are three such values:</p>
 
@@ -372,11 +381,12 @@ becomes:
 </div>
 
 
-### `Compatible with crossOriginIsolated` algorithm ### {#compatible-with-cross-origin-isolated}
+### `Compatible with crossOriginIsolation` algorithm ### {#compatible-with-cross-origin-isolation}
 
 `COEP:credentialess` and `COEP:require-corp` differ in the Fetch specification.
-From the HTML specification point of view, they behave similarly. They are
-referenced together with the `compatible with crossOriginIsolation`
+
+However, from the HTML specification point of view, they behave similarly. They
+are referenced together with the `compatible with crossOriginIsolation`
 algorithm.
 
 <div class="monkey-patch">
@@ -478,22 +488,26 @@ In the [response](https://whatpr.org/fetch/1229.html#responses) section, add:
 
 <div class="monkey-patch">
   <p>A <a for=/>response</a> has an associated <dfn for=response
-  id=concept-response-request-include-credentials>request-include-credentials</dfn>, which is
-  initially set.
+  id=concept-response-request-include-credentials>request-include-credentials</dfn>
+  flag, which is initially set.
 </div>
 
 In the
 [http-network-or-cache-fetch](https://whatpr.org/fetch/1229.html#http-network-or-cache-fetch)
-algorithm. Add step 13.
+algorithm. Add step:
 
 <div class="monkey-patch">
  <p>13. Set <var>response</var>'s <a
  for=response>request-include-credentials</a> to <var>includeCredentials</var>.
 </div>
 
+Note: This attribute is used to require corp for opaque credentialled response
+retrieved via CacheStorage in COEP:credentialless context. See the
+[cache-storage-request](#cache-storage-request) section.  
+
 ### Cross-Origin-Resource-Policy internal check ### {#corp-internal-check}
 
-Modify the step 5. from the the
+Modify the step 5. from the
 [cross-origin-resource-policy-internal-check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check)
 
 <div class="monkey-patch">
@@ -509,11 +523,11 @@ Modify the step 5. from the the
     <li><var>response</var>'s <a for="response">request-include-credentials</a> is true and
         <var>response</var>'s <a for="response">type</a> is "<code>opaque</code>".
 
-    Note: Explained in the [cache-storage-request](#cache-storage-request) section.
+    Note: See the [cache-storage-request](#cache-storage-request) requirement.
 
     <li><var>forNavigation</var> is true.
 
-    Note: Explained in the [main-resource-request](#main-resource-request) section.
+    Note: See the [main-resource-request](#main-resource-request) requirement.
    </ul>
 
    <dt>"<a for="embedder policy value">require-corp</a>"
@@ -526,5 +540,16 @@ Integration with ServiceWorker {#integration-service-worker}
 
 There are no change to the ServiceWorker specification. The CacheStorage issue:
 [w3c/ServiceWorker/issues/1592](https://github.com/w3c/ServiceWorker/issues/1592)
-is resolved in the [corp-internal-check](#corp-internal-check) section in the
+is entirely resolved in this [section](#corp-internal-check) by modifying the
 Fetch specification.
+
+
+Security and privacy considerations {#security-and-privacy}
+===================================
+
+This allow embedding cross-origin resources with no explicit opt-in into a
+cross-origin isolated process. This process has access to powerful
+features like SharedArrayBuffer or precise timers. An attacker can exploit
+[[Spectre]] more easily. The attacker can potentially read the whole process
+memory and access those resources. This concern has been addressed in the
+[cross-origin-isolation](#cross-origin-isolation) section.
