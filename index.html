@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version c6f50773a, updated Fri Apr 16 16:45:47 2021 -0700" name="generator">
   <link href="https://html.spec.whatwg.org/#coep-credentialless" rel="canonical">
-  <meta content="3172d44375440654dc7b61008449374afc285467" name="document-revision">
+  <meta content="f7bee6bb00f1172447c62d9f2261b1ffbc75bc2f" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -1949,14 +1949,15 @@ dfn > a.self-link::before      { content: "#"; }
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
-     <dd><a href="https://github.com/whatwg/html/labels/topic%3A%20cross-origin-embedder-policy-credentialless">whatwg/html topic: cross-origin-embedder-policy-credentialless</a>
+     <dd><a href="https://github.com/whatwg/html/labels/topic%3A%20coep-credentialless">whatwg/html topic: coep-credentialless</a>
+     <dd><a href="https://github.com/w3c/ServiceWorker/labels/topic%3A%20coep-credentialless">w3c/html topic: coep-credentialless</a>
      <dt class="editor">Editors:
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:arthursonzogni@google.com">Arthur Sonzogni</a> (<span class="p-org org">Google Inc.</span>)
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:clamy@google.com">Camille Lamy</a> (<span class="p-org org">Google Inc.</span>)
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:iclelland@google.com">Ian Clelland</a> (<span class="p-org org">Google Inc.</span>)
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:mkwst@google.com">Mike West</a> (<span class="p-org org">Google Inc.</span>)
      <dt>Version History:
-     <dd><a href="https://github.com/WICG/cross-origin-embedder-policy-credentialless/">WICG/cross-origin-embedder-policy-credentialless</a>
+     <dd><a href="https://github.com/WICG/cross-origin-embedder-policy-credentialless/">WICG/coep-credentialless</a>
     </dl>
    </div>
    <div data-fill-with="warning"></div>
@@ -2004,8 +2005,9 @@ dfn > a.self-link::before      { content: "#"; }
       <li>
        <a href="#integration-fetch"><span class="secno">3.2</span> <span class="content">Integration with Fetch</span></a>
        <ol class="toc">
-        <li><a href="#fetch-coep-allow-credentials"><span class="secno">3.2.1</span> <span class="content">Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</span></a>
-        <li><a href="#corp-internal-check"><span class="secno">3.2.2</span> <span class="content">Cross-Origin-Resource-Policy internal check</span></a>
+        <li><a href="#fetch-coep-allow-credentials"><span class="secno">3.2.1</span> <span class="content">Omit credentials for no-cors cross-origin requests</span></a>
+        <li><a href="#request-include-credentials"><span class="secno">3.2.2</span> <span class="content">The response’s request-include-credentials attribute</span></a>
+        <li><a href="#corp-internal-check"><span class="secno">3.2.3</span> <span class="content">Cross-Origin-Resource-Policy internal check</span></a>
        </ol>
       <li><a href="#integration-service-worker"><span class="secno">3.3</span> <span class="content">Integration with ServiceWorker</span></a>
      </ol>
@@ -2233,8 +2235,9 @@ becomes:</p>
     </ol>
    </div>
    <h4 class="heading settled" data-level="3.1.3" id="compatible-with-cross-origin-isolated"><span class="secno">3.1.3. </span><span class="content"><code>Compatible with crossOriginIsolated</code> algorithm</span><a class="self-link" href="#compatible-with-cross-origin-isolated"></a></h4>
-   <p>From the HTML specification point of view, <code>COEP:require-corp</code> and <code>COEP:credentialless</code> behave similarly. They differ in the fetch specification.
-They are referenced together with the <code>compatible with crossOriginIsolation</code> algorithm.</p>
+   <p><code>COEP:credentialess</code> and <code>COEP:require-corp</code> differ in the Fetch specification.
+From the HTML specification point of view, they behave similarly. They are
+referenced together with the <code>compatible with crossOriginIsolation</code> algorithm.</p>
    <div class="monkey-patch">
     <p>A <span data-x="embedder policy value">Cross-Origin-Embedder-Policy value</span> is <dfn data-dfn-type="dfn" data-noexport id="compatible-with-crossoriginisolation">compatible with crossOriginIsolation<a class="self-link" href="#compatible-with-crossoriginisolation"></a></dfn> following this table</p>
     <table class="data">
@@ -2283,7 +2286,7 @@ with crossOriginIsolation, or they are blocked.</p>
    <h3 class="heading settled" data-level="3.2" id="integration-fetch"><span class="secno">3.2. </span><span class="content">Integration with Fetch</span><a class="self-link" href="#integration-fetch"></a></h3>
    <p>See the corresponding fetch specification
 This correspond to the following Fetch specification change: <a href="https://github.com/whatwg/fetch/pull/1229">whatwg/fetch/pull/1229</a></p>
-   <h4 class="heading settled" data-level="3.2.1" id="fetch-coep-allow-credentials"><span class="secno">3.2.1. </span><span class="content">Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</span><a class="self-link" href="#fetch-coep-allow-credentials"></a></h4>
+   <h4 class="heading settled" data-level="3.2.1" id="fetch-coep-allow-credentials"><span class="secno">3.2.1. </span><span class="content">Omit credentials for no-cors cross-origin requests</span><a class="self-link" href="#fetch-coep-allow-credentials"></a></h4>
    <p>Add the following algorithm:</p>
    <div class="monkey-patch">
     <p>To check <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="cross-origin-embedder-policy-allows-credentials">Cross-Origin-Embedder-Policy allows credentials</dfn>, given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request">request</a> <var>request</var>, run theses steps: </p>
@@ -2308,7 +2311,17 @@ fetch</a> algorithm:</p>
    <div class="monkey-patch">
     <p>If <a data-link-type="dfn" href="#cross-origin-embedder-policy-allows-credentials" id="ref-for-cross-origin-embedder-policy-allows-credentials">Cross-Origin-Embedder-Policy allows credentials</a> with <var>request</var> is false, set <var>includeCredentials</var> to false.</p>
    </div>
-   <h4 class="heading settled" data-level="3.2.2" id="corp-internal-check"><span class="secno">3.2.2. </span><span class="content">Cross-Origin-Resource-Policy internal check</span><a class="self-link" href="#corp-internal-check"></a></h4>
+   <h4 class="heading settled" data-level="3.2.2" id="request-include-credentials"><span class="secno">3.2.2. </span><span class="content">The response’s request-include-credentials attribute</span><a class="self-link" href="#request-include-credentials"></a></h4>
+   <p>In the <a href="https://whatpr.org/fetch/1229.html#responses">response</a> section, add:</p>
+   <div class="monkey-patch">
+    <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a> has an associated <dfn class="dfn-paneled" data-dfn-for="response" data-dfn-type="dfn" data-noexport id="concept-response-request-include-credentials">request-include-credentials</dfn>, which is
+  initially set. </p>
+   </div>
+   <p>In the <a href="https://whatpr.org/fetch/1229.html#http-network-or-cache-fetch">http-network-or-cache-fetch</a> algorithm. Add step 13.</p>
+   <div class="monkey-patch">
+    <p>13. Set <var>response</var>’s <a data-link-type="dfn" href="#concept-response-request-include-credentials" id="ref-for-concept-response-request-include-credentials">request-include-credentials</a> to <var>includeCredentials</var>. </p>
+   </div>
+   <h4 class="heading settled" data-level="3.2.3" id="corp-internal-check"><span class="secno">3.2.3. </span><span class="content">Cross-Origin-Resource-Policy internal check</span><a class="self-link" href="#corp-internal-check"></a></h4>
    <p>Modify the step 5. from the the <a href="https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check">cross-origin-resource-policy-internal-check</a></p>
    <div class="monkey-patch">
     <p>5. If <var>policy</var> is null, switch on <var>embedderPolicyValue</var>: </p>
@@ -2321,7 +2334,7 @@ fetch</a> algorithm:</p>
    following is true: 
       <ul>
        <li>
-        <var>response</var>’s <a data-link-type="dfn" href="#concept-response-request-include-credentials" id="ref-for-concept-response-request-include-credentials">request-include-credentials</a> is true and <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type">type</a> is "<code>opaque</code>". 
+        <var>response</var>’s <a data-link-type="dfn" href="#concept-response-request-include-credentials" id="ref-for-concept-response-request-include-credentials①">request-include-credentials</a> is true and <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type">type</a> is "<code>opaque</code>". 
         <p class="note" role="note"><span>Note:</span> Explained in the <a href="#cache-storage-request">cache-storage-request</a> section.</p>
        <li>
         <var>forNavigation</var> is true. 
@@ -2331,18 +2344,9 @@ fetch</a> algorithm:</p>
      <dd> Set <var>policy</var> to "<code>same-origin</code>". 
     </dl>
    </div>
-   <p class="note" role="note"><span>Note:</span> CacheStorage.put() can be used to store a response requested with <code>COEP:unsafe-none</code>. It can then be retrieve later using CacheStorage.match()
-from a <code>COEP:credentialless</code> context.
-See issue: <a href="https://github.com/w3c/ServiceWorker/issues/1592">https://github.com/w3c/ServiceWorker/issues/1592</a>.
-This section presents how to avoid opaque cross-origin resources containing
-credentials with no <code>Cross-Origin-Resource-Policy</code> from entering the <code>COEP:credentialless</code> context.</p>
-   <p>CacheStorage.put() can be used to store a response requested from a <code>COEP:unsafe-none</code> context
-CacheStorage can be used to store a response requested with <code>COEP:unsafe-none</code> This section is made to</p>
-   <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a> has an associated <dfn class="dfn-paneled" data-dfn-for="response" data-dfn-type="dfn" data-noexport id="concept-response-request-include-credentials">request-include-credentials</dfn>, which is
-initially set. </p>
    <h3 class="heading settled" data-level="3.3" id="integration-service-worker"><span class="secno">3.3. </span><span class="content">Integration with ServiceWorker</span><a class="self-link" href="#integration-service-worker"></a></h3>
-   <p>There are no change to the ServiceWorker specification. The CacheStorage issue: <a href="https://github.com/w3c/ServiceWorker/issues/1592">w3c/ServiceWorker/issues/1592</a> is entirely resolved by modifying the CORP internal check from the Fetch
-specification.</p>
+   <p>There are no change to the ServiceWorker specification. The CacheStorage issue: <a href="https://github.com/w3c/ServiceWorker/issues/1592">w3c/ServiceWorker/issues/1592</a> is resolved in the <a href="#corp-internal-check">corp-internal-check</a> section in the
+Fetch specification.</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -2504,56 +2508,56 @@ specification.</p>
   <aside class="dfn-panel" data-for="term-for-concept-request-client">
    <a href="https://fetch.spec.whatwg.org/#concept-request-client">https://fetch.spec.whatwg.org/#concept-request-client</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-client">3.2.1. Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</a> <a href="#ref-for-concept-request-client①">(2)</a> <a href="#ref-for-concept-request-client②">(3)</a>
+    <li><a href="#ref-for-concept-request-client">3.2.1. Omit credentials for no-cors cross-origin requests</a> <a href="#ref-for-concept-request-client①">(2)</a> <a href="#ref-for-concept-request-client②">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request-mode">
    <a href="https://fetch.spec.whatwg.org/#concept-request-mode">https://fetch.spec.whatwg.org/#concept-request-mode</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-concept-request-mode">2.1. Subresource requests</a>
-    <li><a href="#ref-for-concept-request-mode">3.2.1. Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</a>
+    <li><a href="#ref-for-concept-request-mode">3.2.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request-origin">
    <a href="https://fetch.spec.whatwg.org/#concept-request-origin">https://fetch.spec.whatwg.org/#concept-request-origin</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-origin">3.2.1. Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</a>
+    <li><a href="#ref-for-concept-request-origin">3.2.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request">
    <a href="https://fetch.spec.whatwg.org/#concept-request">https://fetch.spec.whatwg.org/#concept-request</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request">3.2.1. Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</a>
+    <li><a href="#ref-for-concept-request">3.2.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-response">
    <a href="https://fetch.spec.whatwg.org/#concept-response">https://fetch.spec.whatwg.org/#concept-response</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-response">3.2.2. Cross-Origin-Resource-Policy internal check</a>
+    <li><a href="#ref-for-concept-response">3.2.2. The response’s request-include-credentials attribute</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-response-type">
    <a href="https://fetch.spec.whatwg.org/#concept-response-type">https://fetch.spec.whatwg.org/#concept-response-type</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-response-type">3.2.2. Cross-Origin-Resource-Policy internal check</a>
+    <li><a href="#ref-for-concept-response-type">3.2.3. Cross-Origin-Resource-Policy internal check</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-settings-object-embedder-policy">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy">https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-settings-object-embedder-policy">3.2.1. Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</a>
+    <li><a href="#ref-for-concept-settings-object-embedder-policy">3.2.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-settings-object-origin">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-settings-object-origin">3.2.1. Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</a>
+    <li><a href="#ref-for-concept-settings-object-origin">3.2.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-same-origin">
    <a href="https://html.spec.whatwg.org/multipage/origin.html#same-origin">https://html.spec.whatwg.org/multipage/origin.html#same-origin</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-same-origin">3.2.1. Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</a>
+    <li><a href="#ref-for-same-origin">3.2.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
@@ -2589,32 +2593,33 @@ specification.</p>
   <aside class="dfn-panel" data-for="embedder-policy-value-unsafe-none">
    <b><a href="#embedder-policy-value-unsafe-none">#embedder-policy-value-unsafe-none</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-embedder-policy-value-unsafe-none">3.2.2. Cross-Origin-Resource-Policy internal check</a>
+    <li><a href="#ref-for-embedder-policy-value-unsafe-none">3.2.3. Cross-Origin-Resource-Policy internal check</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="embedder-policy-value-credentialless">
    <b><a href="#embedder-policy-value-credentialless">#embedder-policy-value-credentialless</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-embedder-policy-value-credentialless">3.2.1. Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</a>
-    <li><a href="#ref-for-embedder-policy-value-credentialless①">3.2.2. Cross-Origin-Resource-Policy internal check</a>
+    <li><a href="#ref-for-embedder-policy-value-credentialless">3.2.1. Omit credentials for no-cors cross-origin requests</a>
+    <li><a href="#ref-for-embedder-policy-value-credentialless①">3.2.3. Cross-Origin-Resource-Policy internal check</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="embedder-policy-value-require-corp">
    <b><a href="#embedder-policy-value-require-corp">#embedder-policy-value-require-corp</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-embedder-policy-value-require-corp">3.2.2. Cross-Origin-Resource-Policy internal check</a>
+    <li><a href="#ref-for-embedder-policy-value-require-corp">3.2.3. Cross-Origin-Resource-Policy internal check</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="cross-origin-embedder-policy-allows-credentials">
    <b><a href="#cross-origin-embedder-policy-allows-credentials">#cross-origin-embedder-policy-allows-credentials</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-cross-origin-embedder-policy-allows-credentials">3.2.1. Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}</a>
+    <li><a href="#ref-for-cross-origin-embedder-policy-allows-credentials">3.2.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="concept-response-request-include-credentials">
    <b><a href="#concept-response-request-include-credentials">#concept-response-request-include-credentials</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-response-request-include-credentials">3.2.2. Cross-Origin-Resource-Policy internal check</a>
+    <li><a href="#ref-for-concept-response-request-include-credentials">3.2.2. The response’s request-include-credentials attribute</a>
+    <li><a href="#ref-for-concept-response-request-include-credentials①">3.2.3. Cross-Origin-Resource-Policy internal check</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
