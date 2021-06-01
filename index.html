@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version c6f50773a, updated Fri Apr 16 16:45:47 2021 -0700" name="generator">
   <link href="https://html.spec.whatwg.org/#coep-credentialless" rel="canonical">
-  <meta content="9515896660969a5d8e154ca3f3c7fbe125ff8c6a" name="document-revision">
+  <meta content="2f07696715e3fbb836ee2e50370c12c183cb8dd3" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -1950,7 +1950,7 @@ dfn > a.self-link::before      { content: "#"; }
     <dl>
      <dt>Issue Tracking:
      <dd><a href="https://github.com/whatwg/html/labels/topic%3A%20coep-credentialless">whatwg/html topic: coep-credentialless</a>
-     <dd><a href="https://github.com/w3c/ServiceWorker/labels/topic%3A%20coep-credentialless">w3c/html topic: coep-credentialless</a>
+     <dd><a href="https://github.com/w3c/ServiceWorker/labels/topic%3A%20coep-credentialless">w3c/ServiceWorker topic: coep-credentialless</a>
      <dt class="editor">Editors:
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:arthursonzogni@google.com">Arthur Sonzogni</a> (<span class="p-org org">Google</span>)
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:clamy@google.com">Camille Lamy</a> (<span class="p-org org">Google</span>)
@@ -1966,12 +1966,13 @@ dfn > a.self-link::before      { content: "#"; }
   </div>
   <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
-   <p>credentialless is a new value for the Cross-Origin-Embedder-Policy (COEP).
+   <p>Credentialless is a Cross-Origin-Embedder-Policy (COEP) variant. Similarly
 
-    Similarly to require-corp, it can be used to enable cross-origin-isolation.
-    It is easier to deploy. Instead of requiring a CORP header for every
-    no-cors subresources, COEP:credentialless is requesting them without
-    credentials like cookies.</p>
+    to <a href="https://html.spec.whatwg.org/multipage/origin.html#embedder-policy-value">require-corp</a>,
+    it can be used to enable <a href="#cross-origin-isolation">cross-origin-isolation</a>.
+    Contrary to require-corp, it is easier to deploy, instead of requiring a
+    Cross-Origin-Resource-Policy (CORP) header for every no-cors subresources,
+    COEP:credentialless is requesting them without credentials.</p>
   </div>
   <div data-fill-with="at-risk"></div>
   <nav data-fill-with="table-of-contents" id="toc">
@@ -1988,7 +1989,7 @@ dfn > a.self-link::before      { content: "#"; }
        </ol>
       <li><a href="#main-resource-request"><span class="secno">2.2</span> <span class="content">Main resource requests</span></a>
       <li><a href="#cache-storage-request"><span class="secno">2.3</span> <span class="content">CacheStorage requests</span></a>
-      <li><a href="#cross-origin-isolation"><span class="secno">2.4</span> <span class="content">Does <code>COEP:credentialless</code> support cross-origin isolation?</span></a>
+      <li><a href="#cross-origin-isolation"><span class="secno">2.4</span> <span class="content">Cross-origin Isolation</span></a>
      </ol>
     <li>
      <a href="#integrations"><span class="secno">3</span> <span class="content">Integrations</span></a>
@@ -2132,7 +2133,7 @@ children is required to specify a CORP header when it is cross-origin.</p>
 opt-in from the embeddee, the <a href="https://github.com/w3ctag/design-reviews/issues/639">anonymous
 iframe</a> project has been
 proposed. This is orthogonal to <code>COEP:credentialless</code>. The latter only deals
-with subresources of the document using this policy.</p>
+with subresources, not <code>&lt;iframe></code>.</p>
    <h3 class="heading settled" data-level="2.3" id="cache-storage-request"><span class="secno">2.3. </span><span class="content">CacheStorage requests</span><a class="self-link" href="#cache-storage-request"></a></h3>
    <p>See the issue: <a href="https://github.com/w3c/ServiceWorker/issues/1592">w3c/ServiceWorker/issues/1592</a></p>
    <p>With CacheStorage’s put() and match() methods, a response fetched from a <code>COEP:unsafe-none</code> context can be retrieved from a <code>COEP:credentialless</code> or <code>COEP:require-corp</code> context.</p>
@@ -2141,7 +2142,7 @@ for <code>COEP:credentialless</code>.</p>
    <p>The solution proposed is to store the <code>includeCredentials</code> variable from the <a href="https://fetch.spec.whatwg.org/#http-network-or-cache-fetch">HTTP-network-or-cache-fetch</a> algorithm into the response. Then during the <a href="https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check">CORP
 check</a>,
 to require CORP for opaque responses requested with credentials.</p>
-   <h3 class="heading settled" data-level="2.4" id="cross-origin-isolation"><span class="secno">2.4. </span><span class="content">Does <code>COEP:credentialless</code> support cross-origin isolation?</span><a class="self-link" href="#cross-origin-isolation"></a></h3>
+   <h3 class="heading settled" data-level="2.4" id="cross-origin-isolation"><span class="secno">2.4. </span><span class="content">Cross-origin Isolation</span><a class="self-link" href="#cross-origin-isolation"></a></h3>
    <p>Above, we asserted that the core goal of the existing opt-in requirement is to
 block interesting data that an attacker wouldn’t otherwise have access to from
 flowing into a process they control. Removing credentials from outgoing requests
@@ -2236,11 +2237,11 @@ becomes:</p>
     </ol>
    </div>
    <h4 class="heading settled" data-level="3.1.3" id="compatible-with-cross-origin-isolation"><span class="secno">3.1.3. </span><span class="content"><code>Compatible with crossOriginIsolation</code> algorithm</span><a class="self-link" href="#compatible-with-cross-origin-isolation"></a></h4>
-   <p><code>COEP:credentialess</code> and <code>COEP:require-corp</code> differ in the Fetch specification.</p>
-   <p>However, from the HTML specification point of view, they behave similarly. They
+   <p><code>COEP:credentialess</code> and <code>COEP:require-corp</code> differ in the Fetch specification.
+However, from the HTML specification point of view, they behave similarly. They
 are referenced together with the <code>compatible with crossOriginIsolation</code> algorithm.</p>
    <div class="monkey-patch">
-    <p>A <span data-x="embedder policy value">Cross-Origin-Embedder-Policy value</span> is <dfn data-dfn-type="dfn" data-noexport id="compatible-with-crossoriginisolation">compatible with crossOriginIsolation<a class="self-link" href="#compatible-with-crossoriginisolation"></a></dfn> following this table</p>
+    <p>A <span data-x="embedder policy value">Cross-Origin-Embedder-Policy value</span> is <dfn data-dfn-type="dfn" data-export id="compatible-with-crossoriginisolation">compatible with crossOriginIsolation<a class="self-link" href="#compatible-with-crossoriginisolation"></a></dfn> following this table</p>
     <table class="data">
      <thead>
       <tr>
@@ -2282,11 +2283,10 @@ COEP:require-corp does.</p>
     <li data-md>
      <p>If a document has a COEP policy compatible with crossOriginIsolation, then the
 documents loaded in its <code>&lt;iframe></code> must also have a COEP policy compatible
-with crossOriginIsolation, or they are blocked.</p>
+with crossOriginIsolation, or be blocked.</p>
    </ol>
    <h3 class="heading settled" data-level="3.2" id="integration-fetch"><span class="secno">3.2. </span><span class="content">Integration with Fetch</span><a class="self-link" href="#integration-fetch"></a></h3>
-   <p>See the corresponding fetch specification
-This correspond to the following Fetch specification change: <a href="https://github.com/whatwg/fetch/pull/1229">whatwg/fetch/pull/1229</a></p>
+   <p>This correspond to the following Fetch specification change: <a href="https://github.com/whatwg/fetch/pull/1229">whatwg/fetch/pull/1229</a></p>
    <h4 class="heading settled" data-level="3.2.1" id="fetch-coep-allow-credentials"><span class="secno">3.2.1. </span><span class="content">Omit credentials for no-cors cross-origin requests</span><a class="self-link" href="#fetch-coep-allow-credentials"></a></h4>
    <p>Add the following algorithm:</p>
    <div class="monkey-patch">
@@ -2350,10 +2350,10 @@ retrieved via CacheStorage in COEP:credentialless context. See the <a href="#cac
    <p>There are no change to the ServiceWorker specification. The CacheStorage issue: <a href="https://github.com/w3c/ServiceWorker/issues/1592">w3c/ServiceWorker/issues/1592</a> is entirely resolved in this <a href="#corp-internal-check">section</a> by modifying the
 Fetch specification.</p>
    <h2 class="heading settled" data-level="4" id="security-and-privacy"><span class="secno">4. </span><span class="content">Security and privacy considerations</span><a class="self-link" href="#security-and-privacy"></a></h2>
-   <p>This allow embedding cross-origin resources with no explicit opt-in into a
+   <p>This allows embedding cross-origin resources with no explicit opt-in into a
 cross-origin isolated process. This process has access to powerful
 features like SharedArrayBuffer or precise timers. An attacker can exploit <a data-link-type="biblio" href="#biblio-spectre">[Spectre]</a> more easily. The attacker can potentially read the whole process
-memory and access those resources. This concern has been addressed in the <a href="#cross-origin-isolation">cross-origin-isolation</a> section.</p>
+memory and read those resources. This concern has been addressed in the <a href="#cross-origin-isolation">cross-origin-isolation</a> section.</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
