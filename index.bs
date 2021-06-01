@@ -10,8 +10,9 @@ Editor: Mike West, Google Inc., mkwst@google.com
 
 Markup Shorthands: markdown yes
 Canonical URL: https://html.spec.whatwg.org/#coep-credentialless
-!Version History: <a href="https://github.com/WICG/cross-origin-embedder-policy-credentialless/">WICG/cross-origin-embedder-policy-credentialless</a>
-Issue Tracking: whatwg/html topic: cross-origin-embedder-policy-credentialless https://github.com/whatwg/html/labels/topic%3A%20cross-origin-embedder-policy-credentialless
+!Version History: <a href="https://github.com/WICG/cross-origin-embedder-policy-credentialless/">WICG/coep-credentialless</a>
+Issue Tracking: whatwg/html topic: coep-credentialless https://github.com/whatwg/html/labels/topic%3A%20coep-credentialless
+Issue Tracking: w3c/html topic: coep-credentialless https://github.com/w3c/ServiceWorker/labels/topic%3A%20coep-credentialless
 Boilerplate: repository-issue-tracking off
 Abstract:
     credentialless is a new value for the Cross-Origin-Embedder-Policy (COEP).
@@ -373,9 +374,9 @@ becomes:
 
 ### `Compatible with crossOriginIsolated` algorithm ### {#compatible-with-cross-origin-isolated}
 
-From the HTML specification point of view, `COEP:require-corp` and
-`COEP:credentialless` behave similarly. They differ in the fetch specification.
-They are referenced together with the `compatible with crossOriginIsolation`
+`COEP:credentialess` and `COEP:require-corp` differ in the Fetch specification.
+From the HTML specification point of view, they behave similarly. They are
+referenced together with the `compatible with crossOriginIsolation`
 algorithm.
 
 <div class="monkey-patch">
@@ -437,7 +438,7 @@ See the corresponding fetch specification
 This correspond to the following Fetch specification change:
 [whatwg/fetch/pull/1229](https://github.com/whatwg/fetch/pull/1229)
 
-### Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}
+### Omit credentials for no-cors cross-origin requests ### {#fetch-coep-allow-credentials}
 
 Add the following algorithm:
 
@@ -471,6 +472,25 @@ algorithm:
   <var>request</var> is false, set <var>includeCredentials</var> to false.</p>
 </div>
 
+### The response's request-include-credentials attribute ### {#request-include-credentials}
+
+In the [response](https://whatpr.org/fetch/1229.html#responses) section, add:
+
+<div class="monkey-patch">
+  <p>A <a for=/>response</a> has an associated <dfn for=response
+  id=concept-response-request-include-credentials>request-include-credentials</dfn>, which is
+  initially set.
+</div>
+
+In the
+[http-network-or-cache-fetch](https://whatpr.org/fetch/1229.html#http-network-or-cache-fetch)
+algorithm. Add step 13.
+
+<div class="monkey-patch">
+ <p>13. Set <var>response</var>'s <a
+ for=response>request-include-credentials</a> to <var>includeCredentials</var>.
+</div>
+
 ### Cross-Origin-Resource-Policy internal check ### {#corp-internal-check}
 
 Modify the step 5. from the the
@@ -501,28 +521,10 @@ Modify the step 5. from the the
   </dl>
 </div>
 
-Note: CacheStorage.put() can be used to store a response requested with
-`COEP:unsafe-none`. It can then be retrieve later using CacheStorage.match()
-from a `COEP:credentialless` context.
-See issue:
-[https://github.com/w3c/ServiceWorker/issues/1592](https://github.com/w3c/ServiceWorker/issues/1592).
-This section presents how to avoid opaque cross-origin resources containing
-credentials with no `Cross-Origin-Resource-Policy` from entering the `COEP:credentialless` context.
-
-CacheStorage.put() can be used to store a response requested from a
-`COEP:unsafe-none` context
-CacheStorage can be used to store a response requested with `COEP:unsafe-none` 
-This section is made to 
-
-
-<p>A <a for=/>response</a> has an associated <dfn for=response
-id=concept-response-request-include-credentials>request-include-credentials</dfn>, which is
-initially set.
-
 Integration with ServiceWorker {#integration-service-worker}
 ------------------------------------------------------------
 
 There are no change to the ServiceWorker specification. The CacheStorage issue:
 [w3c/ServiceWorker/issues/1592](https://github.com/w3c/ServiceWorker/issues/1592)
-is entirely resolved by modifying the CORP internal check from the Fetch
-specification.
+is resolved in the [corp-internal-check](#corp-internal-check) section in the
+Fetch specification.
