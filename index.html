@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version c6f50773a, updated Fri Apr 16 16:45:47 2021 -0700" name="generator">
   <link href="https://html.spec.whatwg.org/#coep-credentialless" rel="canonical">
-  <meta content="2f07696715e3fbb836ee2e50370c12c183cb8dd3" name="document-revision">
+  <meta content="e47c2d38d2e96c5f9018ca7ed2380f80fa896381" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -2117,14 +2117,13 @@ implications on the data it has access to via requests on the one hand and
 storage APIs on the other. Given this capability, it seems clear that we can’t
 just strip credentials from the nested navigational request and call it a day in
 the same way that we could with subresources.</p>
-   <p>For this reason, <code>COEP:credentialless</code> must be as strict as <code>COEP:require-corp</code> for navigational requests. It works works identically.</p>
+   <p>For this reason, <code>COEP:credentialless</code> must be as strict as <code>COEP:require-corp</code> for navigational requests. It works identically.</p>
    <p>That is to say:</p>
    <ol>
     <li data-md>
      <p>If the parent sets <code>COEP:credentialless</code> or <code>COEP:require-corp</code>, then the
-children must also use <code>COEP:credentialless</code> or <code>COEP:require-corp</code>. If it
-doesn’t, its response is blocked by COEP. The two COEP values can be used
-and mixed in any order.</p>
+children must also use <code>COEP:credentialless</code> or <code>COEP:require-corp</code>.
+The two COEP values can be used and mixed in any order. If the children uses <code>COEP:unsafe-none</code>, its response is blocked.</p>
     <li data-md>
      <p>If the parent sets <code>COEP:credentialless</code> or <code>COEP:require-corp</code>, then the
 children is required to specify a CORP header when it is cross-origin.</p>
@@ -2132,8 +2131,8 @@ children is required to specify a CORP header when it is cross-origin.</p>
    <p class="note" role="note"><span>Note:</span> To help developers with embedding cross-origin <code>&lt;iframe></code> without
 opt-in from the embeddee, the <a href="https://github.com/w3ctag/design-reviews/issues/639">anonymous
 iframe</a> project has been
-proposed. This is orthogonal to <code>COEP:credentialless</code>. The latter only deals
-with subresources, not <code>&lt;iframe></code>.</p>
+proposed. It is orthogonal to <code>COEP:credentialless</code>, which only affects
+subresources.</p>
    <h3 class="heading settled" data-level="2.3" id="cache-storage-request"><span class="secno">2.3. </span><span class="content">CacheStorage requests</span><a class="self-link" href="#cache-storage-request"></a></h3>
    <p>See the issue: <a href="https://github.com/w3c/ServiceWorker/issues/1592">w3c/ServiceWorker/issues/1592</a></p>
    <p>With CacheStorage’s put() and match() methods, a response fetched from a <code>COEP:unsafe-none</code> context can be retrieved from a <code>COEP:credentialless</code> or <code>COEP:require-corp</code> context.</p>
@@ -2159,10 +2158,10 @@ requiring a user to be in a privileged network position. These resources would
 continue to leak data in a credentialless model.</p>
    <p>Let’s assert for the moment that servers accessible only via a privileged
 network position can be dealt with entirely by putting a wall between "public"
-and "private", along the lines of the <a href="https://wicg.github.io/cors-rfc1918/">CORS and RFC1918
-proposal</a>. Successfully rolling out that
-kind of model would address the threat of this kind of leakage, perhaps allowing
-us to hand-wave it away.</p>
+and "private", along the lines of the <a href="https://wicg.github.io/private-network-access/">private-network-access</a>.
+Successfully rolling out that kind of model would address the threat of this
+kind of leakage. As such <a href="https://wicg.github.io/private-network-access/">private-network-access</a> is a
+dependency of COEP:credentialless.</p>
    <p>IP-based authentication models are, on the other hand, more difficult to
 address. Though the practice is unfortunate in itself (users should have control
 over their state vis a vis servers they interact with on the one hand, and
@@ -2324,7 +2323,7 @@ fetch</a> algorithm:</p>
    <p class="note" role="note"><span>Note:</span> This attribute is used to require corp for opaque credentialled response
 retrieved via CacheStorage in COEP:credentialless context. See the <a href="#cache-storage-request">cache-storage-request</a> section.</p>
    <h4 class="heading settled" data-level="3.2.3" id="corp-internal-check"><span class="secno">3.2.3. </span><span class="content">Cross-Origin-Resource-Policy internal check</span><a class="self-link" href="#corp-internal-check"></a></h4>
-   <p>Modify the step 5. from the <a href="https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check">cross-origin-resource-policy-internal-check</a></p>
+   <p>Modify the step 5 from the <a href="https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check">cross-origin-resource-policy-internal-check</a></p>
    <div class="monkey-patch">
     <p>5. If <var>policy</var> is null, switch on <var>embedderPolicyValue</var>: </p>
     <dl class="switch">
