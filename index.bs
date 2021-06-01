@@ -219,21 +219,21 @@ just strip credentials from the nested navigational request and call it a day in
 the same way that we could with subresources.
 
 For this reason, `COEP:credentialless` must be as strict as `COEP:require-corp`
-for navigational requests. It works works identically.
-  
+for navigational requests. It works identically.
+
 That is to say:
 1. If the parent sets `COEP:credentialless` or `COEP:require-corp`, then the
-    children must also use `COEP:credentialless` or `COEP:require-corp`. If it
-    doesn't, its response is blocked by COEP. The two COEP values can be used
-    and mixed in any order.
+    children must also use `COEP:credentialless` or `COEP:require-corp`.
+    The two COEP values can be used and mixed in any order. If the children uses
+    `COEP:unsafe-none`, its response is blocked.
 2. If the parent sets `COEP:credentialless` or `COEP:require-corp`, then the
     children is required to specify a CORP header when it is cross-origin.
 
 Note: To help developers with embedding cross-origin `<iframe>` without
 opt-in from the embeddee, the [anonymous
 iframe](https://github.com/w3ctag/design-reviews/issues/639) project has been
-proposed. This is orthogonal to `COEP:credentialless`. The latter only deals
-with subresources, not `<iframe>`.
+proposed. It is orthogonal to `COEP:credentialless`, which only affects
+subresources.
 
 CacheStorage requests {#cache-storage-request}
 ---------------------
@@ -244,7 +244,7 @@ See the issue:
 With CacheStorage's put() and match() methods, a response fetched from a
 `COEP:unsafe-none` context can be retrieved from a  `COEP:credentialless` or
 `COEP:require-corp` context.
-  
+
 Similarly to `COEP:require-corp`, the behavior of CacheStorage must be specified
 for `COEP:credentialless`.
 
@@ -275,10 +275,12 @@ continue to leak data in a credentialless model.
 
 Let's assert for the moment that servers accessible only via a privileged
 network position can be dealt with entirely by putting a wall between "public"
-and "private", along the lines of the [CORS and RFC1918
-proposal](https://wicg.github.io/cors-rfc1918/). Successfully rolling out that
-kind of model would address the threat of this kind of leakage, perhaps allowing
-us to hand-wave it away.
+and "private", along the lines of the
+[private-network-access](https://wicg.github.io/private-network-access/).
+Successfully rolling out that kind of model would address the threat of this
+kind of leakage. As such
+[private-network-access](https://wicg.github.io/private-network-access/) is a
+dependency of COEP:credentialless.
 
 IP-based authentication models are, on the other hand, more difficult to
 address. Though the practice is unfortunate in itself (users should have control
@@ -508,7 +510,7 @@ retrieved via CacheStorage in COEP:credentialless context. See the
 
 ### Cross-Origin-Resource-Policy internal check ### {#corp-internal-check}
 
-Modify the step 5. from the
+Modify the step 5 from the
 [cross-origin-resource-policy-internal-check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check)
 
 <div class="monkey-patch">
