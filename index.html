@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version c6f50773a, updated Fri Apr 16 16:45:47 2021 -0700" name="generator">
   <link href="https://html.spec.whatwg.org/#coep-credentialless" rel="canonical">
-  <meta content="e47c2d38d2e96c5f9018ca7ed2380f80fa896381" name="document-revision">
+  <meta content="96570c3fe22ded366da602316cfde90007b081b0" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -1945,7 +1945,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Cross-Origin-Embedder-Policy: credentialless</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-06-01">1 June 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-06-03">3 June 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
@@ -2138,9 +2138,8 @@ subresources.</p>
    <p>With CacheStorage’s put() and match() methods, a response fetched from a <code>COEP:unsafe-none</code> context can be retrieved from a <code>COEP:credentialless</code> or <code>COEP:require-corp</code> context.</p>
    <p>Similarly to <code>COEP:require-corp</code>, the behavior of CacheStorage must be specified
 for <code>COEP:credentialless</code>.</p>
-   <p>The solution proposed is to store the <code>includeCredentials</code> variable from the <a href="https://fetch.spec.whatwg.org/#http-network-or-cache-fetch">HTTP-network-or-cache-fetch</a> algorithm into the response. Then during the <a href="https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check">CORP
-check</a>,
-to require CORP for opaque responses requested with credentials.</p>
+   <p>The solution proposed is to store the <code>includeCredentials</code> variable from the <a href="https://fetch.spec.whatwg.org/#http-network-or-cache-fetch">HTTP-network-or-cache-fetch</a> algorithm into the response. Then during the <a href="https://w3c.github.io/ServiceWorker/#dom-cache-matchall">dom-cache-match-all</a> algorithm, to block "opaque" responses containing credentials for
+COEP:credentialless documents.</p>
    <h3 class="heading settled" data-level="2.4" id="cross-origin-isolation"><span class="secno">2.4. </span><span class="content">Cross-origin Isolation</span><a class="self-link" href="#cross-origin-isolation"></a></h3>
    <p>Above, we asserted that the core goal of the existing opt-in requirement is to
 block interesting data that an attacker wouldn’t otherwise have access to from
@@ -2312,6 +2311,7 @@ fetch</a> algorithm:</p>
     <p>If <a data-link-type="dfn" href="#cross-origin-embedder-policy-allows-credentials" id="ref-for-cross-origin-embedder-policy-allows-credentials">Cross-Origin-Embedder-Policy allows credentials</a> with <var>request</var> is false, set <var>includeCredentials</var> to false.</p>
    </div>
    <h4 class="heading settled" data-level="3.2.2" id="request-include-credentials"><span class="secno">3.2.2. </span><span class="content">The response’s request-include-credentials attribute</span><a class="self-link" href="#request-include-credentials"></a></h4>
+   <p class="note" role="note"><span>Note:</span> See the <a href="#cache-storage-request">cache-storage-request</a> section.</p>
    <p>In the <a href="https://whatpr.org/fetch/1229.html#responses">response</a> section, add:</p>
    <div class="monkey-patch">
     <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a> has an associated <dfn class="dfn-paneled" data-dfn-for="response" data-dfn-type="dfn" data-noexport id="concept-response-request-include-credentials">request-include-credentials</dfn> flag, which is initially set. </p>
@@ -2320,8 +2320,6 @@ fetch</a> algorithm:</p>
    <div class="monkey-patch">
     <p>13. Set <var>response</var>’s <a data-link-type="dfn" href="#concept-response-request-include-credentials" id="ref-for-concept-response-request-include-credentials">request-include-credentials</a> to <var>includeCredentials</var>. </p>
    </div>
-   <p class="note" role="note"><span>Note:</span> This attribute is used to require corp for opaque credentialled response
-retrieved via CacheStorage in COEP:credentialless context. See the <a href="#cache-storage-request">cache-storage-request</a> section.</p>
    <h4 class="heading settled" data-level="3.2.3" id="corp-internal-check"><span class="secno">3.2.3. </span><span class="content">Cross-Origin-Resource-Policy internal check</span><a class="self-link" href="#corp-internal-check"></a></h4>
    <p>Modify the step 5 from the <a href="https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check">cross-origin-resource-policy-internal-check</a></p>
    <div class="monkey-patch">
@@ -2331,23 +2329,28 @@ retrieved via CacheStorage in COEP:credentialless context. See the <a href="#cac
      <dd> Do nothing. 
      <dt>"<a data-link-type="dfn" href="#embedder-policy-value-credentialless" id="ref-for-embedder-policy-value-credentialless①">credentialless</a>" 
      <dd>
-       Set <var>policy</var> to "<code>same-origin</code>" if one of the
-   following is true: 
-      <ul>
-       <li>
-        <var>response</var>’s <a data-link-type="dfn" href="#concept-response-request-include-credentials" id="ref-for-concept-response-request-include-credentials①">request-include-credentials</a> is true and <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type">type</a> is "<code>opaque</code>". 
-        <p class="note" role="note"><span>Note:</span> See the <a href="#cache-storage-request">cache-storage-request</a> requirement.</p>
-       <li>
-        <var>forNavigation</var> is true. 
-        <p class="note" role="note"><span>Note:</span> See the <a href="#main-resource-request">main-resource-request</a> requirement.</p>
-      </ul>
+       Set <var>policy</var> to "<code>same-origin</code>" if <var>forNavigation</var> is true. 
+      <p class="note" role="note"><span>Note:</span> See the <a href="#main-resource-request">main-resource-request</a> requirement.</p>
      <dt>"<a data-link-type="dfn" href="#embedder-policy-value-require-corp" id="ref-for-embedder-policy-value-require-corp">require-corp</a>" 
      <dd> Set <var>policy</var> to "<code>same-origin</code>". 
     </dl>
    </div>
    <h3 class="heading settled" data-level="3.3" id="integration-service-worker"><span class="secno">3.3. </span><span class="content">Integration with ServiceWorker</span><a class="self-link" href="#integration-service-worker"></a></h3>
-   <p>There are no change to the ServiceWorker specification. The CacheStorage issue: <a href="https://github.com/w3c/ServiceWorker/issues/1592">w3c/ServiceWorker/issues/1592</a> is entirely resolved in this <a href="#corp-internal-check">section</a> by modifying the
-Fetch specification.</p>
+   <p class="note" role="note"><span>Note:</span> See the <a href="#cache-storage-request">cache-storage-request</a> section.</p>
+   <p>In the <a href="https://w3c.github.io/ServiceWorker/#dom-cache-matchall">dom-cache-match-all</a> algorithm. Add step 5.4.1:</p>
+   <div class="monkey-patch">
+    <p>1. If: </p>
+    <ul>
+     <li><var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type">type</a> is
+  "<code>opaque</code>", 
+     <li><var>response</var>’s <a data-link-type="dfn" href="#concept-response-request-include-credentials" id="ref-for-concept-response-request-include-credentials①">request-include-credentials</a> is true, and 
+     <li><var>settingsObjects</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy" id="ref-for-concept-settings-object-embedder-policy①">embedder
+  policy</a> is "<a data-link-type="dfn" href="#embedder-policy-value-credentialless" id="ref-for-embedder-policy-value-credentialless②">credentialless</a>" 
+    </ul>
+    then reject <var>promise</var> with TypeError
+  and abort these steps.
+    <p></p>
+   </div>
    <h2 class="heading settled" data-level="4" id="security-and-privacy"><span class="secno">4. </span><span class="content">Security and privacy considerations</span><a class="self-link" href="#security-and-privacy"></a></h2>
    <p>This allows embedding cross-origin resources with no explicit opt-in into a
 cross-origin isolated process. This process has access to powerful
@@ -2545,13 +2548,14 @@ memory and read those resources. This concern has been addressed in the <a href=
   <aside class="dfn-panel" data-for="term-for-concept-response-type">
    <a href="https://fetch.spec.whatwg.org/#concept-response-type">https://fetch.spec.whatwg.org/#concept-response-type</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-response-type">3.2.3. Cross-Origin-Resource-Policy internal check</a>
+    <li><a href="#ref-for-concept-response-type">3.3. Integration with ServiceWorker</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-settings-object-embedder-policy">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy">https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-concept-settings-object-embedder-policy">3.2.1. Omit credentials for no-cors cross-origin requests</a>
+    <li><a href="#ref-for-concept-settings-object-embedder-policy①">3.3. Integration with ServiceWorker</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-settings-object-origin">
@@ -2612,6 +2616,7 @@ memory and read those resources. This concern has been addressed in the <a href=
    <ul>
     <li><a href="#ref-for-embedder-policy-value-credentialless">3.2.1. Omit credentials for no-cors cross-origin requests</a>
     <li><a href="#ref-for-embedder-policy-value-credentialless①">3.2.3. Cross-Origin-Resource-Policy internal check</a>
+    <li><a href="#ref-for-embedder-policy-value-credentialless②">3.3. Integration with ServiceWorker</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="embedder-policy-value-require-corp">
@@ -2630,7 +2635,7 @@ memory and read those resources. This concern has been addressed in the <a href=
    <b><a href="#concept-response-request-include-credentials">#concept-response-request-include-credentials</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-concept-response-request-include-credentials">3.2.2. The response’s request-include-credentials attribute</a>
-    <li><a href="#ref-for-concept-response-request-include-credentials①">3.2.3. Cross-Origin-Resource-Policy internal check</a>
+    <li><a href="#ref-for-concept-response-request-include-credentials①">3.3. Integration with ServiceWorker</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
