@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version c6f50773a, updated Fri Apr 16 16:45:47 2021 -0700" name="generator">
   <link href="https://html.spec.whatwg.org/#coep-credentialless" rel="canonical">
-  <meta content="96570c3fe22ded366da602316cfde90007b081b0" name="document-revision">
+  <meta content="735c6e10d946ab7a58333ea56937c1a36c72c23f" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -2122,11 +2122,13 @@ the same way that we could with subresources.</p>
    <ol>
     <li data-md>
      <p>If the parent sets <code>COEP:credentialless</code> or <code>COEP:require-corp</code>, then the
-children must also use <code>COEP:credentialless</code> or <code>COEP:require-corp</code>.
-The two COEP values can be used and mixed in any order. If the children uses <code>COEP:unsafe-none</code>, its response is blocked.</p>
+children must also use one of those headers. The two COEP values can be used
+and mixed in any order. If the children uses <code>COEP:unsafe-none</code>, its
+response is blocked.</p>
     <li data-md>
      <p>If the parent sets <code>COEP:credentialless</code> or <code>COEP:require-corp</code>, then the
-children is required to specify a CORP header when it is cross-origin.</p>
+children is required to specify a CORP header when the response is
+cross-origin.</p>
    </ol>
    <p class="note" role="note"><span>Note:</span> To help developers with embedding cross-origin <code>&lt;iframe></code> without
 opt-in from the embeddee, the <a href="https://github.com/w3ctag/design-reviews/issues/639">anonymous
@@ -2157,10 +2159,9 @@ requiring a user to be in a privileged network position. These resources would
 continue to leak data in a credentialless model.</p>
    <p>Let’s assert for the moment that servers accessible only via a privileged
 network position can be dealt with entirely by putting a wall between "public"
-and "private", along the lines of the <a href="https://wicg.github.io/private-network-access/">private-network-access</a>.
-Successfully rolling out that kind of model would address the threat of this
-kind of leakage. As such <a href="https://wicg.github.io/private-network-access/">private-network-access</a> is a
-dependency of COEP:credentialless.</p>
+and "private", along the lines of the <a data-link-type="biblio" href="#biblio-private-network-access">[private-network-access]</a>. Successfully
+rolling out that kind of model would address the threat of this kind of leakage.
+As such <a data-link-type="biblio" href="#biblio-private-network-access">[private-network-access]</a> is a dependency of COEP:credentialless.</p>
    <p>IP-based authentication models are, on the other hand, more difficult to
 address. Though the practice is unfortunate in itself (users should have control
 over their state vis a vis servers they interact with on the one hand, and
@@ -2183,11 +2184,10 @@ without explicit opt-in.</p>
 regardless, even if we don’t end up considering it a fully cross-origin isolated
 context.</p>
    <hr>
-   <p>The rest of this document monkey-patches <a data-link-type="biblio" href="#biblio-html">[HTML]</a> and <a data-link-type="biblio" href="#biblio-fetch">[Fetch]</a> in order to
-document the details of the bits and pieces discussed above.</p>
+   <p>The rest of this document monkey-patches <a data-link-type="biblio" href="#biblio-html">[HTML]</a>, <a data-link-type="biblio" href="#biblio-fetch">[Fetch]</a>, <a data-link-type="biblio" href="#biblio-service-workers">[service-workers]</a> in order to document the details of the bits and pieces discussed above.</p>
    <h2 class="heading settled" data-level="3" id="integrations"><span class="secno">3. </span><span class="content">Integrations</span><a class="self-link" href="#integrations"></a></h2>
    <h3 class="heading settled" data-level="3.1" id="integration-html"><span class="secno">3.1. </span><span class="content">Integration with HTML</span><a class="self-link" href="#integration-html"></a></h3>
-   <p>This correspond to the following HTML specification change: <a href="https://github.com/whatwg/html/pull/6638">whatwg/html/pull/6638</a>.</p>
+   <p class="note" role="note"><span>Note:</span> This corresponds to the following HTML specification change: <a href="https://github.com/whatwg/html/pull/6638">whatwg/html/pull/6638</a>.</p>
    <h4 class="heading settled" data-level="3.1.1" id="embedder-policy-value"><span class="secno">3.1.1. </span><span class="content">Embedder policy value</span><a class="self-link" href="#embedder-policy-value"></a></h4>
    <p>In the <a href="https://html.spec.whatwg.org/#embedder-policy-value">embedder-policy-value</a> section, add the <code>credentialless</code> value:</p>
    <div class="monkey-patch">
@@ -2284,7 +2284,7 @@ documents loaded in its <code>&lt;iframe></code> must also have a COEP policy co
 with crossOriginIsolation, or be blocked.</p>
    </ol>
    <h3 class="heading settled" data-level="3.2" id="integration-fetch"><span class="secno">3.2. </span><span class="content">Integration with Fetch</span><a class="self-link" href="#integration-fetch"></a></h3>
-   <p>This correspond to the following Fetch specification change: <a href="https://github.com/whatwg/fetch/pull/1229">whatwg/fetch/pull/1229</a></p>
+   <p class="note" role="note"><span>Note:</span> This corresponds to the following Fetch specification change: <a href="https://github.com/whatwg/fetch/pull/1229">whatwg/fetch/pull/1229</a></p>
    <h4 class="heading settled" data-level="3.2.1" id="fetch-coep-allow-credentials"><span class="secno">3.2.1. </span><span class="content">Omit credentials for no-cors cross-origin requests</span><a class="self-link" href="#fetch-coep-allow-credentials"></a></h4>
    <p>Add the following algorithm:</p>
    <div class="monkey-patch">
@@ -2602,6 +2602,10 @@ memory and read those resources. This concern has been addressed in the <a href=
   </dl>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
+   <dt id="biblio-private-network-access">[PRIVATE-NETWORK-ACCESS]
+   <dd>Titouan Rigoudy; Mike West. <a href="https://wicg.github.io/private-network-access/">Private network access</a>. URL: <a href="https://wicg.github.io/private-network-access/">https://wicg.github.io/private-network-access/</a>
+   <dt id="biblio-service-workers">[SERVICE-WORKERS]
+   <dd>Alex Russell; et al. <a href="https://www.w3.org/TR/service-workers-1/">Service Workers 1</a>. 19 November 2019. CR. URL: <a href="https://www.w3.org/TR/service-workers-1/">https://www.w3.org/TR/service-workers-1/</a>
    <dt id="biblio-spectre">[Spectre]
    <dd>Paul Kocher; et al. <a href="https://spectreattack.com/spectre.pdf">Spectre Attacks: Exploiting Speculative Execution</a>. URL: <a href="https://spectreattack.com/spectre.pdf">https://spectreattack.com/spectre.pdf</a>
   </dl>
