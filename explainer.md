@@ -50,12 +50,11 @@ https://github.com/w3c/ServiceWorker/issues/1592
 Similarly to `COEP:require-corp`, the behavior of CacheStorage must be specified for `COEP:credentialless`.
 A cross-origin credentialled response, with no CORP header, requested from `COEP:unsafe-none` context must not enter a `COEP:credentialless` context via `CacheStorage.{put,match}`.
 
-The solution proposed is to store the `includeCredentials` variable from the
-[HTTP-network-or-cache-fetch](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)
-algorithm into the response. Then during the
-[dom-cache-match-all](https://w3c.github.io/ServiceWorker/#dom-cache-matchall)
-algorithm, to block "opaque" responses containing credentials for
-COEP:credentialless documents.
+The solution proposed is to store the `includecredentials` variable from the
+[http-network-or-cache-fetch](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)
+algorithm into the response. then during the [corp
+check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check),
+to require CORP for responses requested with credentials.
 
 ### Does `COEP:credentialless` support cross-origin isolation?
 
