@@ -258,12 +258,11 @@ With CacheStorage's put() and match() methods, a response fetched from a
 Similarly to `COEP:require-corp`, the behavior of CacheStorage must be specified
 for `COEP:credentialless`.
 
-The solution proposed is to store the `includeCredentials` variable from the
-[HTTP-network-or-cache-fetch](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)
-algorithm into the response. Then during the
-[dom-cache-match-all](https://w3c.github.io/ServiceWorker/#dom-cache-matchall)
-algorithm, to block "opaque" responses containing credentials for
-COEP:credentialless documents.
+the solution proposed is to store the `includecredentials` variable from the
+[http-network-or-cache-fetch](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)
+algorithm into the response. then during the [corp
+check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check),
+to require CORP for responses requested with credentials.
 
 Cross-origin Isolation {#cross-origin-isolation}
 ----------------------------------------------------------
@@ -316,19 +315,17 @@ context.
 
 -------
 
-The rest of this document monkey-patches [[HTML]], [[Fetch]], [[service-workers]]
-in order to document the details of the bits and pieces discussed above.
-
-Integrations {#integrations}
-============================
+The rest of this document monkey-patches [[HTML]], [[Fetch]] in order to
+document the details of the bits and pieces discussed above.
 
 Integration with HTML {#integration-html}
------------------------------------------
+=====================
 
 Note: This corresponds to the following HTML specification change:
 [whatwg/html/pull/6638](https://github.com/whatwg/html/pull/6638).
 
-### Embedder policy value ### {#embedder-policy-value}
+Embedder policy value {#embedder-policy-value}
+---------------------
 
 In the [embedder-policy-value](https://html.spec.whatwg.org/#embedder-policy-value) section, add the
 `credentialless` value:
@@ -359,7 +356,8 @@ In the [embedder-policy-value](https://html.spec.whatwg.org/#embedder-policy-val
   </dl>
 </div>
 
-### Parsing ### {#parsing}
+Parsing {#parsing}
+-------
 
 The [obtain-an-embedder-policy](https://html.spec.whatwg.org/#obtain-an-embedder-policy) step 4
 becomes:
@@ -394,7 +392,8 @@ becomes:
 </div>
 
 
-### `Compatible with crossOriginIsolation` algorithm ### {#compatible-with-cross-origin-isolation}
+`Compatible with crossOriginIsolation` algorithm {#compatible-with-cross-origin-isolation}
+------------------------------------------------
 
 `COEP:credentialess` and `COEP:require-corp` differ in the Fetch specification.
 However, from the HTML specification point of view, they behave similarly. They
@@ -454,12 +453,13 @@ There are 10 occurences to be replaced. In particular:
     with crossOriginIsolation, or be blocked.
 
 Integration with Fetch {#integration-fetch}
-----------------------
+======================
 
 Note: This corresponds to the following Fetch specification change:
 [whatwg/fetch/pull/1229](https://github.com/whatwg/fetch/pull/1229)
 
-### Omit credentials for no-cors cross-origin requests ### {#fetch-coep-allow-credentials}
+Omit credentials for no-cors cross-origin requests {#fetch-coep-allow-credentials}
+--------------------------------------------------
 
 Add the following algorithm:
 
@@ -493,9 +493,8 @@ algorithm:
   <var>request</var> is false, set <var>includeCredentials</var> to false.</p>
 </div>
 
-### The response's request-include-credentials attribute ### {#request-include-credentials}
-
-Note: See the [cache-storage-request](#cache-storage-request) section.
+The response's request-include-credentials attribute {#request-include-credentials}
+----------------------------------------------------
 
 In the [response](https://whatpr.org/fetch/1229.html#responses) section, add:
 
@@ -514,7 +513,12 @@ algorithm. Add step:
  for=response>request-include-credentials</a> to <var>includeCredentials</var>.
 </div>
 
-### Cross-Origin-Resource-Policy internal check ### {#corp-internal-check}
+Note: This attribute is used to require corp for opaque credentialled response
+retrieved via CacheStorage in COEP:credentialless context. See the
+[cache-storage-request](#cache-storage-request) section.  
+
+Cross-Origin-Resource-Policy internal check {#corp-internal-check}
+-------------------------------------------
 
 Modify the step 5 from the
 [cross-origin-resource-policy-internal-check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check)
@@ -526,10 +530,18 @@ Modify the step 5 from the
    <dd> Do nothing.
 
    <dt>"<a for="embedder policy value">credentialless</a>"
-   <dd> Set <var>policy</var> to "<code>same-origin</code>" if <var
-       ignore="">forNavigation</var> is true.
+   <dd> Set <var>policy</var> to "<code>same-origin</code>" if one of the
+   following is true:
+   <ul>
+    <li><var>response</var>'s <a for="response">request-include-credentials</a>
+      is true.
+
+    Note: See the [cache-storage-request](#cache-storage-request) requirement.
+
+    <li><var ignore="">forNavigation</var> is true.
 
     Note: See the [main-resource-request](#main-resource-request) requirement.
+   </ul>
 
    <dt>"<a for="embedder policy value">require-corp</a>"
    <dd> Set <var>policy</var> to "<code>same-origin</code>".
@@ -537,27 +549,12 @@ Modify the step 5 from the
 </div>
 
 Integration with ServiceWorker {#integration-service-worker}
-------------------------------------------------------------
+============================================================
 
-Note: See the [cache-storage-request](#cache-storage-request) section.
-
-In the
-[dom-cache-match-all](https://w3c.github.io/ServiceWorker/#dom-cache-matchall)
-algorithm. Add step 5.4.1:
-
-<div class="monkey-patch">
-
-  <p>1. If:
-    <ul>
-      <li><var>response</var>'s <a for="response">type</a> is
-  "<code>opaque</code>",
-      <li><var>response</var>'s <a for="response">request-include-credentials</a> is true, and
-      <li><var>settingsObjects</var>'s <a for="environment settings object">embedder
-  policy</a> is "<a for="embedder policy value">credentialless</a>"
-    </ul>then reject <var>promise</var> with TypeError
-  and abort these steps.</p>
-
-</div>
+There are no change to the ServiceWorker specification. The CacheStorage issue:
+[w3c/ServiceWorker/issues/1592](https://github.com/w3c/ServiceWorker/issues/1592)
+is entirely resolved in this [section](#corp-internal-check) by modifying the
+Fetch specification.
 
 
 Security and privacy considerations {#security-and-privacy}
