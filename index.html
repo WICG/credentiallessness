@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version c6f50773a, updated Fri Apr 16 16:45:47 2021 -0700" name="generator">
   <link href="https://html.spec.whatwg.org/#coep-credentialless" rel="canonical">
-  <meta content="c53418c3b0ff68fa775526fa221d7dd3722e84fb" name="document-revision">
+  <meta content="5c052478df725fc27248d5e842e992a69e58d085" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -1945,7 +1945,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Cross-Origin-Embedder-Policy: credentialless</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-06-04">4 June 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-06-09">9 June 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
@@ -2289,15 +2289,14 @@ with crossOriginIsolation, or be blocked.</p>
     <ol>
      <li>
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-mode" id="ref-for-concept-request-mode">mode</a> is not <code>no-cors</code>", return
-   true.</p>
+    true.</p>
      <li>
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client">client</a> is null, return true.</p>
      <li>
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client①">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy" id="ref-for-concept-settings-object-embedder-policy">embedder policy</a> is not
-   "<code><a data-link-type="dfn" href="#embedder-policy-value-credentialless" id="ref-for-embedder-policy-value-credentialless">credentialless</a></code>", return true.</p>
+    "<code><a data-link-type="dfn" href="#embedder-policy-value-credentialless" id="ref-for-embedder-policy-value-credentialless">credentialless</a></code>", return true.</p>
      <li>
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin" id="ref-for-concept-request-origin">origin</a> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#same-origin" id="ref-for-same-origin">same origin</a> with <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client②">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin" id="ref-for-concept-settings-object-origin">origin</a>,
-   return true.</p>
+      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client②">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin" id="ref-for-concept-settings-object-origin">origin</a> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#same-origin" id="ref-for-same-origin">same origin</a> with <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-current-url" id="ref-for-concept-request-current-url">current URL</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin" id="ref-for-concept-url-origin">origin</a>, return true.</p>
      <li>
       <p>Return false.</p>
     </ol>
@@ -2513,17 +2512,17 @@ memory and read those resources. This concern has been addressed in the <a href=
     <li><a href="#ref-for-concept-request-client">4.1. Omit credentials for no-cors cross-origin requests</a> <a href="#ref-for-concept-request-client①">(2)</a> <a href="#ref-for-concept-request-client②">(3)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-request-current-url">
+   <a href="https://fetch.spec.whatwg.org/#concept-request-current-url">https://fetch.spec.whatwg.org/#concept-request-current-url</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-request-current-url">4.1. Omit credentials for no-cors cross-origin requests</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request-mode">
    <a href="https://fetch.spec.whatwg.org/#concept-request-mode">https://fetch.spec.whatwg.org/#concept-request-mode</a><b>Referenced in:</b>
    <ul>
     <li><a href="#termref-for-concept-request-mode">2.1. Subresource requests</a>
     <li><a href="#ref-for-concept-request-mode">4.1. Omit credentials for no-cors cross-origin requests</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="term-for-concept-request-origin">
-   <a href="https://fetch.spec.whatwg.org/#concept-request-origin">https://fetch.spec.whatwg.org/#concept-request-origin</a><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-concept-request-origin">4.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request">
@@ -2556,14 +2555,20 @@ memory and read those resources. This concern has been addressed in the <a href=
     <li><a href="#ref-for-same-origin">4.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-url-origin">
+   <a href="https://url.spec.whatwg.org/#concept-url-origin">https://url.spec.whatwg.org/#concept-url-origin</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-url-origin">4.1. Omit credentials for no-cors cross-origin requests</a>
+   </ul>
+  </aside>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
     <a data-link-type="biblio">[Fetch]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="term-for-concept-request-client">client</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-current-url">current url</span>
      <li><span class="dfn-paneled" id="term-for-concept-request-mode">mode</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-origin">origin</span>
      <li><span class="dfn-paneled" id="term-for-concept-request">request</span>
      <li><span class="dfn-paneled" id="term-for-concept-response">response</span>
     </ul>
@@ -2573,6 +2578,11 @@ memory and read those resources. This concern has been addressed in the <a href=
      <li><span class="dfn-paneled" id="term-for-concept-settings-object-embedder-policy">embedder policy</span>
      <li><span class="dfn-paneled" id="term-for-concept-settings-object-origin">origin</span>
      <li><span class="dfn-paneled" id="term-for-same-origin">same origin</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[URL]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="term-for-concept-url-origin">origin</span>
     </ul>
   </ul>
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
@@ -2584,6 +2594,8 @@ memory and read those resources. This concern has been addressed in the <a href=
    <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>. March 1997. Best Current Practice. URL: <a href="https://tools.ietf.org/html/rfc2119">https://tools.ietf.org/html/rfc2119</a>
+   <dt id="biblio-url">[URL]
+   <dd>Anne van Kesteren. <a href="https://url.spec.whatwg.org/">URL Standard</a>. Living Standard. URL: <a href="https://url.spec.whatwg.org/">https://url.spec.whatwg.org/</a>
   </dl>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
