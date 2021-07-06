@@ -8,6 +8,6 @@ Contrary to require-corp, it is easier to deploy, instead of requiring a
 Cross-Origin-Resource-Policy (CORP) header for every no-cors subresources,
 COEP:credentialless is requesting them without credentials.
 
-See:
-- The [specification](https://htmlpreview.github.io/?https://github.com/mikewest/credentiallessness/blob/main/index.html)
-- The [original explainer](./explainer.md)
+- [Explainer](./explainer.md)
+- [Specification](https://htmlpreview.github.io/?https://github.com/mikewest/credentiallessness/blob/main/index.html)
+- [Experimenting instructions](./experimenting.md)
