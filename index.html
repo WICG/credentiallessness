@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version c6f50773a, updated Fri Apr 16 16:45:47 2021 -0700" name="generator">
   <link href="https://html.spec.whatwg.org/#coep-credentialless" rel="canonical">
-  <meta content="5c052478df725fc27248d5e842e992a69e58d085" name="document-revision">
+  <meta content="b680af5da29b07169ea8373bcd3aff40f086152e" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -1945,7 +1945,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Cross-Origin-Embedder-Policy: credentialless</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-06-09">9 June 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-07-06">6 July 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
@@ -1996,7 +1996,7 @@ dfn > a.self-link::before      { content: "#"; }
      <ol class="toc">
       <li><a href="#embedder-policy-value"><span class="secno">3.1</span> <span class="content">Embedder policy value</span></a>
       <li><a href="#parsing"><span class="secno">3.2</span> <span class="content">Parsing</span></a>
-      <li><a href="#compatible-with-cross-origin-isolation"><span class="secno">3.3</span> <span class="content"><code>Compatible with crossOriginIsolation</code> algorithm</span></a>
+      <li><a href="#compatible-with-cross-origin-isolation"><span class="secno">3.3</span> <span class="content"><code>Compatible with cross-origin isolation</code> algorithm</span></a>
      </ol>
     <li>
      <a href="#integration-fetch"><span class="secno">4</span> <span class="content">Integration with Fetch</span></a>
@@ -2136,7 +2136,7 @@ subresources.</p>
    <p>With CacheStorage’s put() and match() methods, a response fetched from a <code>COEP:unsafe-none</code> context can be retrieved from a <code>COEP:credentialless</code> or <code>COEP:require-corp</code> context.</p>
    <p>Similarly to <code>COEP:require-corp</code>, the behavior of CacheStorage must be specified
 for <code>COEP:credentialless</code>.</p>
-   <p>the solution proposed is to store the <code>includecredentials</code> variable from the <a href="https://fetch.spec.whatwg.org/#http-network-or-cache-fetch">http-network-or-cache-fetch</a> algorithm into the response. then during the <a href="https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check">corp
+   <p>The solution proposed is to store the <code>includecredentials</code> variable from the <a href="https://fetch.spec.whatwg.org/#http-network-or-cache-fetch">http-network-or-cache-fetch</a> algorithm into the response. Then during the <a href="https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check">corp
 check</a>,
 to require CORP for responses requested with credentials.</p>
    <h3 class="heading settled" data-level="2.4" id="cross-origin-isolation"><span class="secno">2.4. </span><span class="content">Cross-origin Isolation</span><a class="self-link" href="#cross-origin-isolation"></a></h3>
@@ -2170,14 +2170,14 @@ processes unless and until they explicitly opted-out of that inclusion via CORP.
 We can minimize the risk of these attacks by increasing CORB’s robustness on the
 one hand, and <a href="https://goto.google.com/embedding-requires-consent">requiring opt-in for embedded
 usage</a> on the other.</p>
-   <p>This leaves us with a tradeoff to evaluate: <code>COEP:credentialless</code> seems
+   <p>This leaves us with a trade-off to evaluate: <code>COEP:credentialless</code> seems
 substantially easier than <code>COEP:require-corp</code> to deploy, both as an opt-in in
 the short-term, and (critically) as default behavior in the long term. It does
 substantially reduce the status quo risk. At the same time, it doesn’t prevent a
 category of resources from flowing into attackers' processes. We have reasonable
 ideas about one chunk of these resources, and would simply not protect the other
 without explicit opt-in.</p>
-   <p>Perhaps that’s a tradeoff worth taking? The mechanism seems worth defining
+   <p>Perhaps that’s a trade-off worth taking? The mechanism seems worth defining
 regardless, even if we don’t end up considering it a fully cross-origin isolated
 context.</p>
    <hr>
@@ -2188,73 +2188,56 @@ document the details of the bits and pieces discussed above.</p>
    <h3 class="heading settled" data-level="3.1" id="embedder-policy-value"><span class="secno">3.1. </span><span class="content">Embedder policy value</span><a class="self-link" href="#embedder-policy-value"></a></h3>
    <p>In the <a href="https://html.spec.whatwg.org/#embedder-policy-value">embedder-policy-value</a> section, add the <code>credentialless</code> value:</p>
    <div class="monkey-patch">
-    <p>An <dfn data-dfn-type="dfn" data-export id="embedder-policy-value①">embedder policy value<a class="self-link" href="#embedder-policy-value①"></a></dfn> controls the fetching of cross-origin resources
+    <p>An <dfn data-var-ignore>embedder policy value</dfn> controls the fetching of cross-origin resources
   without explicit permission from resource owners. There are three such values:</p>
     <dl>
-     <dt>"<dfn class="dfn-paneled" data-dfn-for="embedder policy value" data-dfn-type="dfn" data-noexport data-x="coep-unsafe-none" id="embedder-policy-value-unsafe-none"><code data-x>unsafe-none</code></dfn>"
+     <dt>"<dfn data-var-ignore data-x="coep-unsafe-none" for="embedder policy value"><code data-x>unsafe-none</code></dfn>"
      <dd>
       <p>This is the default value. When this value is used, cross-origin resources can be fetched
-   without giving explicit permission through the <span>CORS protocol</span> or the
-   '<code>Cross-Origin-Resource-Policy</code>' header.</p>
+   without giving explicit permission through the <span>CORS protocol</span> or the <code>&lt;code>Cross-Origin-Resource-Policy&lt;/code></code> header.</p>
+     <dt>"<dfn data-export data-var-ignore data-x="coep-require-corp" for="embedder policy value"><code data-x>require-corp</code></dfn>"
+     <dd>
+      <p>When this value is used, fetching cross-origin resources requires the server’s
+   explicit permission through the <span>CORS protocol</span> or the <code>&lt;code>Cross-Origin-Resource-Policy&lt;/code></code> header.</p>
      <dt>"<dfn class="dfn-paneled" data-dfn-for="embedder policy value" data-dfn-type="dfn" data-export data-x="coep-credentialless" id="embedder-policy-value-credentialless"><code data-x>credentialless</code></dfn>"
      <dd>
       <p>When this value is used, fetching cross-origin no-CORS resources omits credentials. In
-   exchange, an explicit '<code>Cross-Origin-Resource-Policy</code>' on response is not required. </p>
-     <dt>"<dfn class="dfn-paneled" data-dfn-for="embedder policy value" data-dfn-type="dfn" data-noexport data-x="coep-require-corp" id="embedder-policy-value-require-corp"><code data-x>require-corp</code></dfn>"
-     <dd>
-      <p>When this value is used, fetching cross-origin resources requires the server’s
-   explicit permission through the <span>CORS protocol</span> or the
-   '<code>Cross-Origin-Resource-Policy</code>' header.</p>
+   exchange, and explicit <code>&lt;code>Cross-Origin-Resource-Policy&lt;/code></code> is not required. Other
+   requests sent with credentials requires the server’s explicit permission through the <span>CORS
+   protocol</span> or the <code>&lt;code>Cross-Origin-Resource-Policy&lt;/code></code> header.</p>
     </dl>
    </div>
    <h3 class="heading settled" data-level="3.2" id="parsing"><span class="secno">3.2. </span><span class="content">Parsing</span><a class="self-link" href="#parsing"></a></h3>
-   <p>The <a href="https://html.spec.whatwg.org/#obtain-an-embedder-policy">obtain-an-embedder-policy</a> step 4
-becomes:</p>
-   <div class="algorithm" data-algorithm="obtain-an-embedder-policy">
-    <p>4. If <var>parsedItem</var> is non-null</p>
+   <p>In <a href="https://html.spec.whatwg.org/#obtain-an-embedder-policy">obtain-an-embedder-policy</a>,</p>
+   <p>Step 4 about Cross-Origin-Embedder-Policy becomes:</p>
+   <div class="algorithm" data-algorithm="obtain-an-embedder-policy-step-4">
+    <p>4. If <var>parsedItem</var> is non-null and <var>parsedItem</var>[0] is "<code data-x>credentialless</code>" or "<code data-x>require-corp</code>":</p>
     <ol>
      <li>
-      <p>If <var>parsedItem</var>[0] is "<code data-x>credentialless</code>":</p>
-      <ol>
-       <li>
-        <p>Set <var>policy</var>’s <span data-x="embedder-policy-value">value</span> to "<code data-x="coep-credentialless">credentialless</code>".</p>
-       <li>
-        <p>If <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"] <span data-x="map exists">exists</span>, then set <var>policy</var>’s <span data-x="embedder-policy-reporting-endpoint">endpoint</span> to <var>parsedItem</var> [1]["<code data-x="coep-report-to">report-to</code>"].</p>
-      </ol>
+      <p>Set <var>policy</var>’s <span data-x="embedder-policy-value">value</span> to <var>parsedItem</var>[0].</p>
      <li>
-      <p>If <var>parsedItem</var>[0] is "<code data-x>require-corp</code>":</p>
-      <ol>
-       <li>
-        <p>Set <var>policy</var>’s <span data-x="embedder-policy-value">value</span> to "<code data-x="coep-require-corp">require-corp</code>".</p>
-       <li>
-        <p>If <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"] <span data-x="map exists">exists</span>, then set <var>policy</var>’s <span data-x="embedder-policy-reporting-endpoint">endpoint</span> to <var>parsedItem</var> [1]["<code data-x="coep-report-to">report-to</code>"].</p>
-      </ol>
+      <p>If <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"] <span data-x="map exists">exists</span>, then set <var>policy</var>’s <span data-x="embedder-policy-reporting-endpoint">endpoint</span> to <var>parsedItem</var> [1]["<code data-x="coep-report-to">report-to</code>"].</p>
     </ol>
    </div>
-   <h3 class="heading settled" data-level="3.3" id="compatible-with-cross-origin-isolation"><span class="secno">3.3. </span><span class="content"><code>Compatible with crossOriginIsolation</code> algorithm</span><a class="self-link" href="#compatible-with-cross-origin-isolation"></a></h3>
+   <p>Step 6 about Cross-Origin-Embedder-Policy-Report-Only becomes:</p>
+   <div class="algorithm" data-algorithm="obtain-an-embedder-policy-step-6">
+    <p>6. If <var>parsedItem</var> is non-null and <var>parsedItem</var>[0] is "<code data-x>credentialless</code>" or "<code data-x>require-corp</code>":</p>
+    <ol>
+     <li>
+      <p>Set <var>policy</var>’s <span data-x="embedder-policy-report-only-value">value</span> to <var>parsedItem</var>[0].</p>
+     <li>
+      <p>If <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"] <span data-x="map exists">exists</span>, then set <var>policy</var>’s <span data-x="embedder-policy-report-only-reporting-endpoint">endpoint</span> to <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"].</p>
+    </ol>
+   </div>
+   <h3 class="heading settled" data-level="3.3" id="compatible-with-cross-origin-isolation"><span class="secno">3.3. </span><span class="content"><code>Compatible with cross-origin isolation</code> algorithm</span><a class="self-link" href="#compatible-with-cross-origin-isolation"></a></h3>
    <p><code>COEP:credentialess</code> and <code>COEP:require-corp</code> differ in the Fetch specification.
 However, from the HTML specification point of view, they behave similarly. They
-are referenced together with the <code>compatible with crossOriginIsolation</code> algorithm.</p>
+are referenced together with the <code>compatible with cross-origin isolation</code> algorithm.</p>
    <div class="monkey-patch">
-    <p>A <span data-x="embedder policy value">Cross-Origin-Embedder-Policy value</span> is <dfn data-dfn-type="dfn" data-export id="compatible-with-crossoriginisolation">compatible with crossOriginIsolation<a class="self-link" href="#compatible-with-crossoriginisolation"></a></dfn> following this table</p>
-    <table class="data">
-     <thead>
-      <tr>
-       <th><span data-x="embedder policy value">Value</span>
-       <th><span>Compatible with crossOriginIsolation</span>
-     <tbody>
-      <tr>
-       <td><code data-x="coep-unsafe-none">unsafe-none</code>
-       <td>false
-      <tr>
-       <td><code data-x="coep-credentialless">credentialless</code>
-       <td>true 
-      <tr>
-       <td><code data-x="coep-require-corp">require-corp</code>
-       <td>true
-    </table>
+    <p>An <span>embedder policy value</span> is <dfn data-var-ignore>compatible with cross-origin isolation</dfn> if it
+  it either "<code data-x="coep-credentialless">credentialless</code>" or "<code data-x="coep-require-corp">require-corp</code>".</p>
    </div>
-   <p>Then replace every occurence of:</p>
+   <p>Then replace every occurrence of:</p>
    <table class="data">
     <thead>
      <tr>
@@ -2264,21 +2247,21 @@ are referenced together with the <code>compatible with crossOriginIsolation</cod
      <tr>
       <td> <var>coep</var>’s <span data-x="embedder-policy-value">value</span> is "<code data-x="coep-require-corp">require-corp</code>". 
       <td> <var>coep</var>’s <span data-x="embedder-policy-value">value</span> is <span>compatible with
-        crossOriginIsolation</span>. 
+        cross-origin isolation</span>. 
      <tr>
       <td> <var>coep</var>’s <span data-x="embedder-policy-value">value</span> is "<code data-x="coep-unsafe-none">unsafe-none</code>". 
       <td> <var>coep</var>’s <span data-x="embedder-policy-value">value</span> is not <span>compatible with
-        crossOriginIsolation</span>. 
+        cross-origin isolation</span>. 
    </table>
-   <p>There are 10 occurences to be replaced. In particular:</p>
+   <p>There are 10 occurrences to be replaced. In particular:</p>
    <ol>
     <li data-md>
-     <p>COEP:credentialless can be used to enable crossOriginIsolation, the same way
+     <p>COEP:credentialless can be used to enable cross-origin isolation, the same way
 COEP:require-corp does.</p>
     <li data-md>
-     <p>If a document has a COEP policy compatible with crossOriginIsolation, then the
+     <p>If a document has a COEP policy compatible with cross-origin isolation, then the
 documents loaded in its <code>&lt;iframe></code> must also have a COEP policy compatible
-with crossOriginIsolation, or be blocked.</p>
+with , or be blocked.</p>
    </ol>
    <h2 class="heading settled" data-level="4" id="integration-fetch"><span class="secno">4. </span><span class="content">Integration with Fetch</span><a class="self-link" href="#integration-fetch"></a></h2>
    <p class="note" role="note"><span>Note:</span> This corresponds to the following Fetch specification change: <a href="https://github.com/whatwg/fetch/pull/1229">whatwg/fetch/pull/1229</a></p>
@@ -2289,14 +2272,14 @@ with crossOriginIsolation, or be blocked.</p>
     <ol>
      <li>
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-mode" id="ref-for-concept-request-mode">mode</a> is not <code>no-cors</code>", return
-    true.</p>
+   true.</p>
      <li>
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client">client</a> is null, return true.</p>
      <li>
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client①">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy" id="ref-for-concept-settings-object-embedder-policy">embedder policy</a> is not
-    "<code><a data-link-type="dfn" href="#embedder-policy-value-credentialless" id="ref-for-embedder-policy-value-credentialless">credentialless</a></code>", return true.</p>
+   "<code><a data-link-type="dfn" href="#embedder-policy-value-credentialless" id="ref-for-embedder-policy-value-credentialless">credentialless</a></code>", return true.</p>
      <li>
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client②">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin" id="ref-for-concept-settings-object-origin">origin</a> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#same-origin" id="ref-for-same-origin">same origin</a> with <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-current-url" id="ref-for-concept-request-current-url">current URL</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin" id="ref-for-concept-url-origin">origin</a>, return true.</p>
+      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin" id="ref-for-concept-request-origin">origin</a> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#same-origin" id="ref-for-same-origin">same origin</a> with <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-current-url" id="ref-for-concept-request-current-url">current URL</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin" id="ref-for-concept-url-origin">origin</a>, return true.</p>
      <li>
       <p>Return false.</p>
     </ol>
@@ -2304,12 +2287,13 @@ with crossOriginIsolation, or be blocked.</p>
    <p>Then, use it in the step 8.4. of the <a href="https://fetch.spec.whatwg.org/#concept-http-network-or-cache-fetch">HTTP-network-or-cache
 fetch</a> algorithm:</p>
    <div class="monkey-patch">
-    <p>If <a data-link-type="dfn" href="#cross-origin-embedder-policy-allows-credentials" id="ref-for-cross-origin-embedder-policy-allows-credentials">Cross-Origin-Embedder-Policy allows credentials</a> with <var>request</var> is false, set <var>includeCredentials</var> to false.</p>
+    <p>If <a data-link-type="dfn" href="#cross-origin-embedder-policy-allows-credentials" id="ref-for-cross-origin-embedder-policy-allows-credentials">Cross-Origin-Embedder-Policy allows credentials</a> with <var>request</var> returns
+   false, set <var>includeCredentials</var> to false.</p>
    </div>
    <h3 class="heading settled" data-level="4.2" id="request-include-credentials"><span class="secno">4.2. </span><span class="content">The response’s request-include-credentials attribute</span><a class="self-link" href="#request-include-credentials"></a></h3>
    <p>In the <a href="https://whatpr.org/fetch/1229.html#responses">response</a> section, add:</p>
    <div class="monkey-patch">
-    <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a> has an associated <dfn class="dfn-paneled" data-dfn-for="response" data-dfn-type="dfn" data-noexport id="concept-response-request-include-credentials">request-include-credentials</dfn> flag, which is initially set. </p>
+    <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a> has an associated <dfn class="dfn-paneled" data-dfn-for="response" data-dfn-type="dfn" data-noexport id="concept-response-request-include-credentials">request-include-credentials</dfn> (a boolean), which is initially true. </p>
    </div>
    <p>In the <a href="https://whatpr.org/fetch/1229.html#http-network-or-cache-fetch">http-network-or-cache-fetch</a> algorithm. Add step:</p>
    <div class="monkey-patch">
@@ -2322,12 +2306,11 @@ retrieved via CacheStorage in COEP:credentialless context. See the <a href="#cac
    <div class="monkey-patch">
     <p>5. If <var>policy</var> is null, switch on <var>embedderPolicyValue</var>: </p>
     <dl class="switch">
-     <dt>"<a data-link-type="dfn" href="#embedder-policy-value-unsafe-none" id="ref-for-embedder-policy-value-unsafe-none">unsafe-none</a>" 
+     <dt>"<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#coep-unsafe-none" id="ref-for-coep-unsafe-none">unsafe-none</a>" 
      <dd> Do nothing. 
      <dt>"<a data-link-type="dfn" href="#embedder-policy-value-credentialless" id="ref-for-embedder-policy-value-credentialless①">credentialless</a>" 
      <dd>
-       Set <var>policy</var> to "<code>same-origin</code>" if one of the
-   following is true: 
+       Set <var>policy</var> to "<code>same-origin</code>" if one of the following is true: 
       <ul>
        <li>
         <var>response</var>’s <a data-link-type="dfn" href="#concept-response-request-include-credentials" id="ref-for-concept-response-request-include-credentials①">request-include-credentials</a> is true. 
@@ -2336,7 +2319,7 @@ retrieved via CacheStorage in COEP:credentialless context. See the <a href="#cac
         <var>forNavigation</var> is true. 
         <p class="note" role="note"><span>Note:</span> See the <a href="#main-resource-request">main-resource-request</a> requirement.</p>
       </ul>
-     <dt>"<a data-link-type="dfn" href="#embedder-policy-value-require-corp" id="ref-for-embedder-policy-value-require-corp">require-corp</a>" 
+     <dt>"<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#coep-require-corp" id="ref-for-coep-require-corp">require-corp</a>" 
      <dd> Set <var>policy</var> to "<code>same-origin</code>". 
     </dl>
    </div>
@@ -2498,18 +2481,14 @@ memory and read those resources. This concern has been addressed in the <a href=
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
-   <li><a href="#compatible-with-crossoriginisolation">compatible with crossOriginIsolation</a><span>, in §3.3</span>
    <li><a href="#embedder-policy-value-credentialless">credentialless</a><span>, in §3.1</span>
    <li><a href="#cross-origin-embedder-policy-allows-credentials">Cross-Origin-Embedder-Policy allows credentials</a><span>, in §4.1</span>
-   <li><a href="#embedder-policy-value①">embedder policy value</a><span>, in §3.1</span>
    <li><a href="#concept-response-request-include-credentials">request-include-credentials</a><span>, in §4.2</span>
-   <li><a href="#embedder-policy-value-require-corp">require-corp</a><span>, in §3.1</span>
-   <li><a href="#embedder-policy-value-unsafe-none">unsafe-none</a><span>, in §3.1</span>
   </ul>
   <aside class="dfn-panel" data-for="term-for-concept-request-client">
    <a href="https://fetch.spec.whatwg.org/#concept-request-client">https://fetch.spec.whatwg.org/#concept-request-client</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-client">4.1. Omit credentials for no-cors cross-origin requests</a> <a href="#ref-for-concept-request-client①">(2)</a> <a href="#ref-for-concept-request-client②">(3)</a>
+    <li><a href="#ref-for-concept-request-client">4.1. Omit credentials for no-cors cross-origin requests</a> <a href="#ref-for-concept-request-client①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request-current-url">
@@ -2523,6 +2502,12 @@ memory and read those resources. This concern has been addressed in the <a href=
    <ul>
     <li><a href="#termref-for-concept-request-mode">2.1. Subresource requests</a>
     <li><a href="#ref-for-concept-request-mode">4.1. Omit credentials for no-cors cross-origin requests</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-request-origin">
+   <a href="https://fetch.spec.whatwg.org/#concept-request-origin">https://fetch.spec.whatwg.org/#concept-request-origin</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-request-origin">4.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request">
@@ -2543,16 +2528,22 @@ memory and read those resources. This concern has been addressed in the <a href=
     <li><a href="#ref-for-concept-settings-object-embedder-policy">4.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-concept-settings-object-origin">
-   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin</a><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="term-for-coep-require-corp">
+   <a href="https://html.spec.whatwg.org/multipage/origin.html#coep-require-corp">https://html.spec.whatwg.org/multipage/origin.html#coep-require-corp</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-settings-object-origin">4.1. Omit credentials for no-cors cross-origin requests</a>
+    <li><a href="#ref-for-coep-require-corp">4.3. Cross-Origin-Resource-Policy internal check</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-same-origin">
    <a href="https://html.spec.whatwg.org/multipage/origin.html#same-origin">https://html.spec.whatwg.org/multipage/origin.html#same-origin</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-same-origin">4.1. Omit credentials for no-cors cross-origin requests</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-coep-unsafe-none">
+   <a href="https://html.spec.whatwg.org/multipage/origin.html#coep-unsafe-none">https://html.spec.whatwg.org/multipage/origin.html#coep-unsafe-none</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-coep-unsafe-none">4.3. Cross-Origin-Resource-Policy internal check</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-url-origin">
@@ -2569,6 +2560,7 @@ memory and read those resources. This concern has been addressed in the <a href=
      <li><span class="dfn-paneled" id="term-for-concept-request-client">client</span>
      <li><span class="dfn-paneled" id="term-for-concept-request-current-url">current url</span>
      <li><span class="dfn-paneled" id="term-for-concept-request-mode">mode</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-origin">origin</span>
      <li><span class="dfn-paneled" id="term-for-concept-request">request</span>
      <li><span class="dfn-paneled" id="term-for-concept-response">response</span>
     </ul>
@@ -2576,8 +2568,9 @@ memory and read those resources. This concern has been addressed in the <a href=
     <a data-link-type="biblio">[HTML]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="term-for-concept-settings-object-embedder-policy">embedder policy</span>
-     <li><span class="dfn-paneled" id="term-for-concept-settings-object-origin">origin</span>
+     <li><span class="dfn-paneled" id="term-for-coep-require-corp">require-corp</span>
      <li><span class="dfn-paneled" id="term-for-same-origin">same origin</span>
+     <li><span class="dfn-paneled" id="term-for-coep-unsafe-none">unsafe-none</span>
     </ul>
    <li>
     <a data-link-type="biblio">[URL]</a> defines the following terms:
@@ -2604,23 +2597,11 @@ memory and read those resources. This concern has been addressed in the <a href=
    <dt id="biblio-spectre">[Spectre]
    <dd>Paul Kocher; et al. <a href="https://spectreattack.com/spectre.pdf">Spectre Attacks: Exploiting Speculative Execution</a>. URL: <a href="https://spectreattack.com/spectre.pdf">https://spectreattack.com/spectre.pdf</a>
   </dl>
-  <aside class="dfn-panel" data-for="embedder-policy-value-unsafe-none">
-   <b><a href="#embedder-policy-value-unsafe-none">#embedder-policy-value-unsafe-none</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-embedder-policy-value-unsafe-none">4.3. Cross-Origin-Resource-Policy internal check</a>
-   </ul>
-  </aside>
   <aside class="dfn-panel" data-for="embedder-policy-value-credentialless">
    <b><a href="#embedder-policy-value-credentialless">#embedder-policy-value-credentialless</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-embedder-policy-value-credentialless">4.1. Omit credentials for no-cors cross-origin requests</a>
     <li><a href="#ref-for-embedder-policy-value-credentialless①">4.3. Cross-Origin-Resource-Policy internal check</a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="embedder-policy-value-require-corp">
-   <b><a href="#embedder-policy-value-require-corp">#embedder-policy-value-require-corp</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-embedder-policy-value-require-corp">4.3. Cross-Origin-Resource-Policy internal check</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="cross-origin-embedder-policy-allows-credentials">

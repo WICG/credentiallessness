@@ -258,9 +258,9 @@ With CacheStorage's put() and match() methods, a response fetched from a
 Similarly to `COEP:require-corp`, the behavior of CacheStorage must be specified
 for `COEP:credentialless`.
 
-the solution proposed is to store the `includecredentials` variable from the
+The solution proposed is to store the `includecredentials` variable from the
 [http-network-or-cache-fetch](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)
-algorithm into the response. then during the [corp
+algorithm into the response. Then during the [corp
 check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check),
 to require CORP for responses requested with credentials.
 
@@ -301,7 +301,7 @@ We can minimize the risk of these attacks by increasing CORB's robustness on the
 one hand, and [requiring opt-in for embedded
 usage](https://goto.google.com/embedding-requires-consent) on the other.
 
-This leaves us with a tradeoff to evaluate: `COEP:credentialless` seems
+This leaves us with a trade-off to evaluate: `COEP:credentialless` seems
 substantially easier than `COEP:require-corp` to deploy, both as an opt-in in
 the short-term, and (critically) as default behavior in the long term. It does
 substantially reduce the status quo risk. At the same time, it doesn't prevent a
@@ -309,7 +309,7 @@ category of resources from flowing into attackers' processes. We have reasonable
 ideas about one chunk of these resources, and would simply not protect the other
 without explicit opt-in.
 
-Perhaps that's a tradeoff worth taking? The mechanism seems worth defining
+Perhaps that's a trade-off worth taking? The mechanism seems worth defining
 regardless, even if we don't end up considering it a fully cross-origin isolated
 context.
 
@@ -331,95 +331,82 @@ In the [embedder-policy-value](https://html.spec.whatwg.org/#embedder-policy-val
 `credentialless` value:
 
 <div class="monkey-patch">
-  <p>An <dfn export>embedder policy value</dfn> controls the fetching of cross-origin resources
+  <p>An <dfn ignore="">embedder policy value</dfn> controls the fetching of cross-origin resources
   without explicit permission from resource owners. There are three such values:</p>
 
   <dl>
-
-   <dt>"<dfn data-x="coep-unsafe-none" for="embedder policy value"><code
+   <dt>"<dfn ignore="" data-x="coep-unsafe-none" for="embedder policy value"><code
    data-x="">unsafe-none</code></dfn>"</dt>
    <dd><p>This is the default value. When this value is used, cross-origin resources can be fetched
    without giving explicit permission through the <span>CORS protocol</span> or the
-   '<code>Cross-Origin-Resource-Policy</code>' header.</p></dd>
+   `<code>Cross-Origin-Resource-Policy</code>` header.</p></dd>
 
-   <dt>"<dfn data-x="coep-credentialless" export for="embedder policy value"><code
-   data-x="">credentialless</code></dfn>"</dt>
-   <dd><p>When this value is used, fetching cross-origin no-CORS resources omits credentials. In
-   exchange, an explicit '<code>Cross-Origin-Resource-Policy</code>' on response is not required.
-   </p></dd>
-
-   <dt>"<dfn data-x="coep-require-corp" for="embedder policy value"><code
+   <dt>"<dfn ignore="" data-x="coep-require-corp" export for="embedder policy value"><code
    data-x="">require-corp</code></dfn>"</dt>
    <dd><p>When this value is used, fetching cross-origin resources requires the server's
    explicit permission through the <span>CORS protocol</span> or the
-   '<code>Cross-Origin-Resource-Policy</code>' header.</p></dd>
+   `<code>Cross-Origin-Resource-Policy</code>` header.</p></dd>
+
+   <dt>"<dfn export data-x="coep-credentialless" export for="embedder policy value"><code
+   data-x="">credentialless</code></dfn>"</dt>
+   <dd><p>When this value is used, fetching cross-origin no-CORS resources omits credentials. In
+   exchange, and explicit `<code>Cross-Origin-Resource-Policy</code>` is not required. Other
+   requests sent with credentials requires the server's explicit permission through the <span>CORS
+   protocol</span> or the `<code>Cross-Origin-Resource-Policy</code>` header.</p></dd>
   </dl>
 </div>
 
 Parsing {#parsing}
 -------
 
-The [obtain-an-embedder-policy](https://html.spec.whatwg.org/#obtain-an-embedder-policy) step 4
-becomes:
+In [obtain-an-embedder-policy](https://html.spec.whatwg.org/#obtain-an-embedder-policy),
 
-<div algorithm="obtain-an-embedder-policy">
- <p>4. If <var>parsedItem</var> is non-null</p>
- <ol>
-   <!--credentialless-->
-   <li><p>If <var>parsedItem</var>[0] is "<code data-x="">credentialless</code>":</p>
-   <ol>
-    <li><p>Set <var>policy</var>'s <span data-x="embedder-policy-value">value</span> to "<code
-    data-x="coep-credentialless">credentialless</code>".</p></li>
+Step 4 about Cross-Origin-Embedder-Policy becomes:
+<div algorithm="obtain-an-embedder-policy-step-4">
+  <p>4. If <var>parsedItem</var> is non-null and <var>parsedItem</var>[0] is "<code
+  data-x="">credentialless</code>" or "<code data-x="">require-corp</code>":</p>
 
-    <li><p>If <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"] <span
-    data-x="map exists">exists</span>, then set <var>policy</var>'s <span
-    data-x="embedder-policy-reporting-endpoint">endpoint</span> to <var>parsedItem</var>
-    [1]["<code data-x="coep-report-to">report-to</code>"].</p></li>
-   </ol>
+  <ol>
+   <li><p>Set <var>policy</var>'s <span data-x="embedder-policy-value">value</span> to
+   <var>parsedItem</var>[0].</p></li>
 
-   <!--require-corp-->
-   <li><p>If <var>parsedItem</var>[0] is "<code data-x="">require-corp</code>":</p>
-   <ol>
-    <li><p>Set <var>policy</var>'s <span data-x="embedder-policy-value">value</span> to "<code
-    data-x="coep-require-corp">require-corp</code>".</p></li>
+   <li><p>If <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"] <span
+   data-x="map exists">exists</span>, then set <var>policy</var>'s <span
+   data-x="embedder-policy-reporting-endpoint">endpoint</span> to <var>parsedItem</var>
+   [1]["<code data-x="coep-report-to">report-to</code>"].</p></li>
+</div>
 
-    <li><p>If <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"] <span
-    data-x="map exists">exists</span>, then set <var>policy</var>'s <span
-    data-x="embedder-policy-reporting-endpoint">endpoint</span> to <var>parsedItem</var>
-    [1]["<code data-x="coep-report-to">report-to</code>"].</p></li>
-   </ol>
- </ol>
+Step 6 about Cross-Origin-Embedder-Policy-Report-Only becomes:
+<div algorithm="obtain-an-embedder-policy-step-6">
+  <p>6. If <var>parsedItem</var> is non-null and <var>parsedItem</var>[0] is "<code
+  data-x="">credentialless</code>" or "<code data-x="">require-corp</code>":</p>
+
+  <ol>
+   <li><p>Set <var>policy</var>'s <span
+   data-x="embedder-policy-report-only-value">value</span> to <var>parsedItem</var>[0].</p></li>
+
+   <li><p>If <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"] <span
+   data-x="map exists">exists</span>, then set <var>policy</var>'s <span
+   data-x="embedder-policy-report-only-reporting-endpoint">endpoint</span> to
+   <var>parsedItem</var>[1]["<code data-x="coep-report-to">report-to</code>"].</p></li>
 </div>
 
 
-`Compatible with crossOriginIsolation` algorithm {#compatible-with-cross-origin-isolation}
+`Compatible with cross-origin isolation` algorithm {#compatible-with-cross-origin-isolation}
 ------------------------------------------------
 
 `COEP:credentialess` and `COEP:require-corp` differ in the Fetch specification.
 However, from the HTML specification point of view, they behave similarly. They
-are referenced together with the `compatible with crossOriginIsolation`
+are referenced together with the `compatible with cross-origin isolation`
 algorithm.
 
 <div class="monkey-patch">
-  <p>A <span data-x="embedder policy value">Cross-Origin-Embedder-Policy value</span> is
-  <dfn export>compatible with crossOriginIsolation</dfn> following this table</p>
-
-  <table class="data">
-   <thead>
-    <tr>
-      <th><span data-x="embedder policy value">Value</span></th>
-      <th><span>Compatible with crossOriginIsolation</span></th>
-    </tr>
-   </thead>
-   <tbody>
-    <tr><td><code data-x="coep-unsafe-none">unsafe-none</code></td> <td>false</td></tr>
-    <tr><td><code data-x="coep-credentialless">credentialless</code></td><td>true
-    </td> </tr>
-    <tr><td><code data-x="coep-require-corp">require-corp</code></td> <td>true</td></tr>
-  </table>
+  <p>An <span>embedder policy value</span> is <dfn ignore="">compatible with cross-origin isolation</dfn> if it
+  it either "<code data-x="coep-credentialless">credentialless</code>" or "<code
+  data-x="coep-require-corp">require-corp</code>".</p>
 </div>
 
-Then replace every occurence of:
+Then replace every occurrence of:
 
 <table class="data">
   <thead>
@@ -433,24 +420,24 @@ Then replace every occurence of:
         data-x="coep-require-corp">require-corp</code>".
       <td>
         <var>coep</var>'s <span data-x="embedder-policy-value">value</span> is <span>compatible with
-        crossOriginIsolation</span>.
+        cross-origin isolation</span>.
     <tr>
       <td>
         <var>coep</var>'s <span data-x="embedder-policy-value">value</span> is "<code
         data-x="coep-unsafe-none">unsafe-none</code>".
       <td>
         <var>coep</var>'s <span data-x="embedder-policy-value">value</span> is not <span>compatible with
-        crossOriginIsolation</span>.
+        cross-origin isolation</span>.
     </tr>
   </tbody>
 </table>
 
-There are 10 occurences to be replaced. In particular:
-1. COEP:credentialless can be used to enable crossOriginIsolation, the same way
+There are 10 occurrences to be replaced. In particular:
+1. COEP:credentialless can be used to enable cross-origin isolation, the same way
     COEP:require-corp does.
-2. If a document has a COEP policy compatible with crossOriginIsolation, then the
+2. If a document has a COEP policy compatible with cross-origin isolation, then the
     documents loaded in its `<iframe>` must also have a COEP policy compatible
-    with crossOriginIsolation, or be blocked.
+    with , or be blocked.
 
 Integration with Fetch {#integration-fetch}
 ======================
@@ -465,23 +452,22 @@ Add the following algorithm:
 
 <div class="monkey-patch">
   <p>To check <dfn export>Cross-Origin-Embedder-Policy allows credentials</dfn>, given a
-  <a for=/>request</a> <var ignore="">request</var>, run theses steps:
+  <a for=/>request</a> <var>request</var>, run theses steps:
 
   <ol>
-    <li><p>If <var>request</var>'s <a for=request>mode</a> is not <code>no-cors</code>", return
-    true.</p>
-   
-    <li><p>If <var>request</var>'s <a for=request>client</a> is null, return true.</p>
-   
-    <li><p>If <var>request</var>'s <a for=request>client</a>'s <a for="environment settings
-    object">embedder policy</a> is not
-    "<code><a for="embedder policy value">credentialless</a></code>", return true.</p>
-   
-    <li><p>If <var>request</var>'s <a for=request>client</a>'s <a for="environment settings
-    object">origin</a> is <a>same origin</a> with <var>request</var>'s <a
-    for=request>current URL</a>'s <a for=url>origin</a>, return true.</p>
-   
-    <li><p>Return false.</p>
+   <li><p>If <var>request</var>'s <a for=request>mode</a> is not <code>no-cors</code>", return
+   true.</p>
+
+   <li><p>If <var>request</var>'s <a for=request>client</a> is null, return true.</p>
+
+   <li><p>If <var>request</var>'s <a for=request>client</a>'s <a for="environment settings
+   object">embedder policy</a> is not
+   "<code><a for="embedder policy value">credentialless</a></code>", return true.</p>
+
+   <li><p>If <var>request</var>'s <a for=request>origin</a> is <a>same origin</a> with
+   <var>request</var>'s <a for=request>current URL</a>'s <a for=url>origin</a>, return true.</p>
+
+   <li><p>Return false.</p>
   </ol>
 </div>
 
@@ -489,8 +475,8 @@ Then, use it in the step 8.4. of the [HTTP-network-or-cache
 fetch](https://fetch.spec.whatwg.org/#concept-http-network-or-cache-fetch)
 algorithm:
 <div class="monkey-patch">
-  <p>If <a>Cross-Origin-Embedder-Policy allows credentials</a> with
-  <var>request</var> is false, set <var>includeCredentials</var> to false.</p>
+   <p>If <a>Cross-Origin-Embedder-Policy allows credentials</a> with <var>request</var> returns
+   false, set <var>includeCredentials</var> to false.</p>
 </div>
 
 The response's request-include-credentials attribute {#request-include-credentials}
@@ -499,9 +485,9 @@ The response's request-include-credentials attribute {#request-include-credentia
 In the [response](https://whatpr.org/fetch/1229.html#responses) section, add:
 
 <div class="monkey-patch">
-  <p>A <a for=/>response</a> has an associated <dfn for=response
-  id=concept-response-request-include-credentials>request-include-credentials</dfn>
-  flag, which is initially set.
+  <p>A <a for=/>response</a> has an associated
+  <dfn for=response id=concept-response-request-include-credentials>request-include-credentials</dfn>
+  (a boolean), which is initially true.
 </div>
 
 In the
@@ -525,27 +511,25 @@ Modify the step 5 from the
 
 <div class="monkey-patch">
  <p>5. If <var>policy</var> is null, switch on <var ignore="">embedderPolicyValue</var>:
-  <dl class=switch>
-   <dt>"<a for="embedder policy value">unsafe-none</a>"
-   <dd> Do nothing.
+ <dl class=switch>
+  <dt>"<a for="embedder policy value">unsafe-none</a>"
+  <dd> Do nothing.
 
-   <dt>"<a for="embedder policy value">credentialless</a>"
-   <dd> Set <var>policy</var> to "<code>same-origin</code>" if one of the
-   following is true:
-   <ul>
-    <li><var>response</var>'s <a for="response">request-include-credentials</a>
-      is true.
+  <dt>"<a for="embedder policy value">credentialless</a>"
+  <dd> Set <var>policy</var> to "<code>same-origin</code>" if one of the following is true:
+  <ul>
+   <li><var>response</var>'s <a for="response">request-include-credentials</a> is true.
 
-    Note: See the [cache-storage-request](#cache-storage-request) requirement.
+   Note: See the [cache-storage-request](#cache-storage-request) requirement.
 
-    <li><var ignore="">forNavigation</var> is true.
+   <li><var ignore="">forNavigation</var> is true.
 
-    Note: See the [main-resource-request](#main-resource-request) requirement.
-   </ul>
+   Note: See the [main-resource-request](#main-resource-request) requirement.
+  </ul>
 
-   <dt>"<a for="embedder policy value">require-corp</a>"
-   <dd> Set <var>policy</var> to "<code>same-origin</code>".
-  </dl>
+  <dt>"<a for="embedder policy value">require-corp</a>"
+  <dd> Set <var>policy</var> to "<code>same-origin</code>".
+ </dl>
 </div>
 
 Integration with ServiceWorker {#integration-service-worker}
