@@ -9,5 +9,5 @@ Cross-Origin-Resource-Policy (CORP) header for every no-cors subresources,
 COEP:credentialless is requesting them without credentials.
 
 - [Explainer](./explainer.md)
-- [Specification](https://htmlpreview.github.io/?https://github.com/mikewest/credentiallessness/blob/main/index.html)
+- [Specification](https://wicg.github.io/credentiallessness/)
 - [Experimenting instructions](./experimenting.md)
