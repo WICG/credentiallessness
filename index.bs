@@ -339,20 +339,20 @@ In the [embedder-policy-value](https://html.spec.whatwg.org/#embedder-policy-val
    data-x="">unsafe-none</code></dfn>"</dt>
    <dd><p>This is the default value. When this value is used, cross-origin resources can be fetched
    without giving explicit permission through the <span>CORS protocol</span> or the
-   `<code>Cross-Origin-Resource-Policy</code>` header.</p></dd>
+   '<code>Cross-Origin-Resource-Policy</code>' header.</p></dd>
 
    <dt>"<dfn ignore="" data-x="coep-require-corp" export for="embedder policy value"><code
    data-x="">require-corp</code></dfn>"</dt>
    <dd><p>When this value is used, fetching cross-origin resources requires the server's
    explicit permission through the <span>CORS protocol</span> or the
-   `<code>Cross-Origin-Resource-Policy</code>` header.</p></dd>
+   '<code>Cross-Origin-Resource-Policy</code>' header.</p></dd>
 
    <dt>"<dfn export data-x="coep-credentialless" export for="embedder policy value"><code
    data-x="">credentialless</code></dfn>"</dt>
    <dd><p>When this value is used, fetching cross-origin no-CORS resources omits credentials. In
-   exchange, and explicit `<code>Cross-Origin-Resource-Policy</code>` is not required. Other
+   exchange, and explicit '<code>Cross-Origin-Resource-Policy</code>' is not required. Other
    requests sent with credentials requires the server's explicit permission through the <span>CORS
-   protocol</span> or the `<code>Cross-Origin-Resource-Policy</code>` header.</p></dd>
+   protocol</span> or the '<code>Cross-Origin-Resource-Policy</code>' header.</p></dd>
   </dl>
 </div>
 

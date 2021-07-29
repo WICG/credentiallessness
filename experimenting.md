@@ -33,9 +33,7 @@ Origin Trial
 ------------
 
 COEP:credentialless is available as an [origin trial] in Chrome 93 to 95. The
-origin trial ends on November 3rd, 2021. Starting from revision
-[898802](https://chromiumdash.appspot.com/commit/0ac56533de3ce867869bc126f5ad648193ed9158)
-(Not released yet as of 2021-06-07).
+origin trial ends on November 3rd, 2021.
 
 Origin trials allow you to try new features on your website and give feedback on
 their usability, practicality, and effectiveness to the web standards community.

@@ -1490,7 +1490,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version c6f50773a, updated Fri Apr 16 16:45:47 2021 -0700" name="generator">
   <link href="https://html.spec.whatwg.org/#coep-credentialless" rel="canonical">
-  <meta content="b680af5da29b07169ea8373bcd3aff40f086152e" name="document-revision">
+  <meta content="f166d6b06f38ece0d9b23d70745dd8fb06a3a2a4" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -1945,7 +1945,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Cross-Origin-Embedder-Policy: credentialless</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-07-06">6 July 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-07-29">29 July 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
@@ -2194,17 +2194,19 @@ document the details of the bits and pieces discussed above.</p>
      <dt>"<dfn data-var-ignore data-x="coep-unsafe-none" for="embedder policy value"><code data-x>unsafe-none</code></dfn>"
      <dd>
       <p>This is the default value. When this value is used, cross-origin resources can be fetched
-   without giving explicit permission through the <span>CORS protocol</span> or the <code>&lt;code>Cross-Origin-Resource-Policy&lt;/code></code> header.</p>
+   without giving explicit permission through the <span>CORS protocol</span> or the
+   '<code>Cross-Origin-Resource-Policy</code>' header.</p>
      <dt>"<dfn data-export data-var-ignore data-x="coep-require-corp" for="embedder policy value"><code data-x>require-corp</code></dfn>"
      <dd>
       <p>When this value is used, fetching cross-origin resources requires the server’s
-   explicit permission through the <span>CORS protocol</span> or the <code>&lt;code>Cross-Origin-Resource-Policy&lt;/code></code> header.</p>
+   explicit permission through the <span>CORS protocol</span> or the
+   '<code>Cross-Origin-Resource-Policy</code>' header.</p>
      <dt>"<dfn class="dfn-paneled" data-dfn-for="embedder policy value" data-dfn-type="dfn" data-export data-x="coep-credentialless" id="embedder-policy-value-credentialless"><code data-x>credentialless</code></dfn>"
      <dd>
       <p>When this value is used, fetching cross-origin no-CORS resources omits credentials. In
-   exchange, and explicit <code>&lt;code>Cross-Origin-Resource-Policy&lt;/code></code> is not required. Other
+   exchange, and explicit '<code>Cross-Origin-Resource-Policy</code>' is not required. Other
    requests sent with credentials requires the server’s explicit permission through the <span>CORS
-   protocol</span> or the <code>&lt;code>Cross-Origin-Resource-Policy&lt;/code></code> header.</p>
+   protocol</span> or the '<code>Cross-Origin-Resource-Policy</code>' header.</p>
     </dl>
    </div>
    <h3 class="heading settled" data-level="3.2" id="parsing"><span class="secno">3.2. </span><span class="content">Parsing</span><a class="self-link" href="#parsing"></a></h3>
