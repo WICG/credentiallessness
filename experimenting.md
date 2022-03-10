@@ -20,6 +20,8 @@ COEP:credentialless will be available for experimenting behind a flag and an
 [Origin Trial](https://github.com/GoogleChrome/OriginTrials) starting from
 version M93.
 
+From Chrome >= M96, it is now **enabled by default**.
+
 Feature flag
 -------------
 
