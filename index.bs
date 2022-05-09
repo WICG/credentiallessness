@@ -15,13 +15,19 @@ Issue Tracking: whatwg/html topic: coep-credentialless https://github.com/whatwg
 Issue Tracking: w3c/ServiceWorker topic: coep-credentialless https://github.com/w3c/ServiceWorker/labels/topic%3A%20coep-credentialless
 Boilerplate: repository-issue-tracking off
 Abstract:
-    Credentialless is a Cross-Origin-Embedder-Policy (COEP) variant. Similarly
-    to
-    [require-corp](https://html.spec.whatwg.org/multipage/origin.html#embedder-policy-value),
-    it can be used to enable [cross-origin-isolation](#cross-origin-isolation).
-    Contrary to require-corp, it is easier to deploy, instead of requiring a
-    Cross-Origin-Resource-Policy (CORP) header for every no-cors subresources,
-    COEP:credentialless is requesting them without credentials.
+    Credentialless is a Cross-Origin-Embedder-Policy (COEP) variant. Similarly to
+    [require-corp](https://html.spec.whatwg.org/multipage/origin.html#embedder-policy-value), it can
+    be used to enable [cross-origin-isolation](#cross-origin-isolation). Contrary to require-corp,
+    it is easier to deploy, instead of requiring a Cross-Origin-Resource-Policy (CORP) header for
+    every no-cors subresources, COEP:credentialless is requesting them without credentials.
+Warning: Custom
+Custom Warning Title: Obsoletion Notice
+Custom Warning Text:
+    COEP:credentialless merged into the [[HTML]] and [[Fetch]] specification. <br/>
+    This document is no longer actively maintained, and should not be used as a
+    guide for implementations. </br>
+    See PR: [whatwg/html/6638](https://github.com/whatwg/html/pull/6638),
+    [whatwg/fetch/1229](https://github.com/whatwg/fetch/pull/1229)
 </pre>
 <pre boilerplate="copyright">&copy;2021, Google, Inc. All rights reserved.</pre>
 
@@ -89,9 +95,6 @@ spec:fetch; type:dfn; for:/; text:network error
 spec:fetch; type:dfn; for:/; text:request
 spec:fetch; type:dfn; for:/; text:coep-require-corp
 spec:fetch; type:dfn; for:/; text:response
-spec:fetch; type:dfn; for:/; text:embedderPolicyValue
-spec:fetch; type:dfn; for:/; text:embedder-policy-value
-spec:fetch; type:dfn; for:/; text:embedderPolicy
 spec:fetch; type:dfn; text: cors check
 spec:html; type:dfn; for:/; text:browsing context
 spec:html; type:dfn; for:/; text:container document
@@ -461,8 +464,8 @@ Add the following algorithm:
    <li><p>If <var>request</var>'s <a for=request>client</a> is null, return true.</p>
 
    <li><p>If <var>request</var>'s <a for=request>client</a>'s <a for="environment settings
-   object">embedder policy</a> is not
-   "<code><a for="embedder policy value">credentialless</a></code>", return true.</p>
+   object">policy container</a>'s <a for="policy container">embedder policy</a>  is not "<code><a
+   for="embedder policy value">credentialless</a></code>", return true.</p>
 
    <li><p>If <var>request</var>'s <a for=request>origin</a> is <a>same origin</a> with
    <var>request</var>'s <a for=request>current URL</a>'s <a for=url>origin</a>, return true.</p>

@@ -12,7 +12,7 @@
  *   - .toc for the Table of Contents (<ol class="toc">)
  *     + <span class="secno"> for the section numbers
  *   - #toc for the Table of Contents (<nav id="toc">)
- *   - ul.index for Indices (<a href="#ref">term</a><span>, in §N.M</span>)
+ *   - ul.index for Indices (<a href="#ref">term</a><span>, in § N.M</span>)
  *   - table.index for Index Tables (e.g. for properties or elements)
  *
  * Structural Markup
@@ -598,7 +598,6 @@
 	a[href]:focus,
 	a[href]:hover {
 		text-decoration-thickness: 2px;
-		text-decoratin
 	}
 	a[href]:active {
 		color: #c00;
@@ -1270,7 +1269,7 @@ Possible extra rowspan handling
 	ul.index ul,
 	ul.index dl { font-size: smaller; }
 	@media not print {
-		ul.index li span:not(.dfn-paneled) {
+		ul.index li a + span {
 			white-space: nowrap;
 			color: transparent; }
 		ul.index li a:hover + span,
@@ -1488,9 +1487,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version c6f50773a, updated Fri Apr 16 16:45:47 2021 -0700" name="generator">
+  <meta content="Bikeshed version 4717b82c6, updated Thu Mar 10 13:43:21 2022 -0800" name="generator">
   <link href="https://wicg.github.io/credentiallessness/" rel="canonical">
-  <meta content="07b7e1d7f89a63a48dbfe4528d4ccb3a3ef2c84d" name="document-revision">
+  <meta content="df1418c043a0dc39a5095bed3e83b274cabc4bbb" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -1741,6 +1740,16 @@ figcaption:not(.no-marker)::before {
 
 .dfn-paneled { cursor: pointer; }
 </style>
+<style>/* style-issues */
+
+a[href].issue-return {
+    float: right;
+    float: inline-end;
+    color: var(--issueheading-text);
+    font-weight: bold;
+    text-decoration: none;
+}
+</style>
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1945,7 +1954,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Cross-Origin-Embedder-Policy: credentialless</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-07-29">29 July 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2022-05-09">9 May 2022</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
@@ -1960,19 +1969,22 @@ dfn > a.self-link::before      { content: "#"; }
      <dd><a href="https://github.com/WICG/credentiallessness/">WICG/credentiallessness</a>
     </dl>
    </div>
-   <div data-fill-with="warning"></div>
+   <div data-fill-with="warning">
+    <details class="annoying-warning" open>
+     <summary>Obsoletion Notice</summary>
+     <p>COEP:credentialless merged into the <a data-link-type="biblio" href="#biblio-html">[HTML]</a> and <a data-link-type="biblio" href="#biblio-fetch">[Fetch]</a> specification. <br> This document is no longer actively maintained, and should not be used as a
+guide for implementations. <br> See PR: <a href="https://github.com/whatwg/html/pull/6638">whatwg/html/6638</a>, <a href="https://github.com/whatwg/fetch/pull/1229">whatwg/fetch/1229</a></p>
+    </details>
+   </div>
    <p class="copyright" data-fill-with="copyright">©2021, Google, Inc. All rights reserved.</p>
    <hr title="Separator for header">
   </div>
   <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
-   <p>Credentialless is a Cross-Origin-Embedder-Policy (COEP) variant. Similarly
-
-    to <a href="https://html.spec.whatwg.org/multipage/origin.html#embedder-policy-value">require-corp</a>,
-    it can be used to enable <a href="#cross-origin-isolation">cross-origin-isolation</a>.
-    Contrary to require-corp, it is easier to deploy, instead of requiring a
-    Cross-Origin-Resource-Policy (CORP) header for every no-cors subresources,
-    COEP:credentialless is requesting them without credentials.</p>
+   <p>Credentialless is a Cross-Origin-Embedder-Policy (COEP) variant. Similarly to <a href="https://html.spec.whatwg.org/multipage/origin.html#embedder-policy-value">require-corp</a>, it can
+    be used to enable <a href="#cross-origin-isolation">cross-origin-isolation</a>. Contrary to require-corp,
+    it is easier to deploy, instead of requiring a Cross-Origin-Resource-Policy (CORP) header for
+    every no-cors subresources, COEP:credentialless is requesting them without credentials.</p>
   </div>
   <div data-fill-with="at-risk"></div>
   <nav data-fill-with="table-of-contents" id="toc">
@@ -2278,8 +2290,7 @@ with , or be blocked.</p>
      <li>
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client">client</a> is null, return true.</p>
      <li>
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client①">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy" id="ref-for-concept-settings-object-embedder-policy">embedder policy</a> is not
-   "<code><a data-link-type="dfn" href="#embedder-policy-value-credentialless" id="ref-for-embedder-policy-value-credentialless">credentialless</a></code>", return true.</p>
+      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client" id="ref-for-concept-request-client①">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-policy-container" id="ref-for-concept-settings-object-policy-container">policy container</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#policy-container-embedder-policy" id="ref-for-policy-container-embedder-policy">embedder policy</a> is not "<code><a data-link-type="dfn" href="#embedder-policy-value-credentialless" id="ref-for-embedder-policy-value-credentialless">credentialless</a></code>", return true.</p>
      <li>
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin" id="ref-for-concept-request-origin">origin</a> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#same-origin" id="ref-for-same-origin">same origin</a> with <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-current-url" id="ref-for-concept-request-current-url">current URL</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin" id="ref-for-concept-url-origin">origin</a>, return true.</p>
      <li>
@@ -2483,9 +2494,9 @@ memory and read those resources. This concern has been addressed in the <a href=
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
-   <li><a href="#embedder-policy-value-credentialless">credentialless</a><span>, in §3.1</span>
-   <li><a href="#cross-origin-embedder-policy-allows-credentials">Cross-Origin-Embedder-Policy allows credentials</a><span>, in §4.1</span>
-   <li><a href="#concept-response-request-include-credentials">request-include-credentials</a><span>, in §4.2</span>
+   <li><a href="#embedder-policy-value-credentialless">credentialless</a><span>, in § 3.1</span>
+   <li><a href="#cross-origin-embedder-policy-allows-credentials">Cross-Origin-Embedder-Policy allows credentials</a><span>, in § 4.1</span>
+   <li><a href="#concept-response-request-include-credentials">request-include-credentials</a><span>, in § 4.2</span>
   </ul>
   <aside class="dfn-panel" data-for="term-for-concept-request-client">
    <a href="https://fetch.spec.whatwg.org/#concept-request-client">https://fetch.spec.whatwg.org/#concept-request-client</a><b>Referenced in:</b>
@@ -2524,10 +2535,16 @@ memory and read those resources. This concern has been addressed in the <a href=
     <li><a href="#ref-for-concept-response">4.2. The response’s request-include-credentials attribute</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-concept-settings-object-embedder-policy">
-   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy">https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-embedder-policy</a><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="term-for-policy-container-embedder-policy">
+   <a href="https://html.spec.whatwg.org/multipage/origin.html#policy-container-embedder-policy">https://html.spec.whatwg.org/multipage/origin.html#policy-container-embedder-policy</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-settings-object-embedder-policy">4.1. Omit credentials for no-cors cross-origin requests</a>
+    <li><a href="#ref-for-policy-container-embedder-policy">4.1. Omit credentials for no-cors cross-origin requests</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-settings-object-policy-container">
+   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-policy-container">https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-policy-container</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-settings-object-policy-container">4.1. Omit credentials for no-cors cross-origin requests</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-coep-require-corp">
@@ -2569,7 +2586,8 @@ memory and read those resources. This concern has been addressed in the <a href=
    <li>
     <a data-link-type="biblio">[HTML]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-concept-settings-object-embedder-policy">embedder policy</span>
+     <li><span class="dfn-paneled" id="term-for-policy-container-embedder-policy">embedder policy</span>
+     <li><span class="dfn-paneled" id="term-for-concept-settings-object-policy-container">policy container</span>
      <li><span class="dfn-paneled" id="term-for-coep-require-corp">require-corp</span>
      <li><span class="dfn-paneled" id="term-for-same-origin">same origin</span>
      <li><span class="dfn-paneled" id="term-for-coep-unsafe-none">unsafe-none</span>
@@ -2584,20 +2602,20 @@ memory and read those resources. This concern has been addressed in the <a href=
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
    <dt id="biblio-fetch">[Fetch]
-   <dd>Anne van Kesteren. <a href="https://fetch.spec.whatwg.org/">Fetch Standard</a>. Living Standard. URL: <a href="https://fetch.spec.whatwg.org/">https://fetch.spec.whatwg.org/</a>
+   <dd>Anne van Kesteren. <a href="https://fetch.spec.whatwg.org/"><cite>Fetch Standard</cite></a>. Living Standard. URL: <a href="https://fetch.spec.whatwg.org/">https://fetch.spec.whatwg.org/</a>
    <dt id="biblio-html">[HTML]
-   <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
+   <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/"><cite>HTML Standard</cite></a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-rfc2119">[RFC2119]
-   <dd>S. Bradner. <a href="https://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>. March 1997. Best Current Practice. URL: <a href="https://tools.ietf.org/html/rfc2119">https://tools.ietf.org/html/rfc2119</a>
+   <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
    <dt id="biblio-url">[URL]
-   <dd>Anne van Kesteren. <a href="https://url.spec.whatwg.org/">URL Standard</a>. Living Standard. URL: <a href="https://url.spec.whatwg.org/">https://url.spec.whatwg.org/</a>
+   <dd>Anne van Kesteren. <a href="https://url.spec.whatwg.org/"><cite>URL Standard</cite></a>. Living Standard. URL: <a href="https://url.spec.whatwg.org/">https://url.spec.whatwg.org/</a>
   </dl>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-private-network-access">[PRIVATE-NETWORK-ACCESS]
-   <dd>Titouan Rigoudy; Mike West. <a href="https://wicg.github.io/private-network-access/">Private network access</a>. URL: <a href="https://wicg.github.io/private-network-access/">https://wicg.github.io/private-network-access/</a>
+   <dd>Titouan Rigoudy; Mike West. <a href="https://wicg.github.io/private-network-access/"><cite>Private network access</cite></a>. URL: <a href="https://wicg.github.io/private-network-access/">https://wicg.github.io/private-network-access/</a>
    <dt id="biblio-spectre">[Spectre]
-   <dd>Paul Kocher; et al. <a href="https://spectreattack.com/spectre.pdf">Spectre Attacks: Exploiting Speculative Execution</a>. URL: <a href="https://spectreattack.com/spectre.pdf">https://spectreattack.com/spectre.pdf</a>
+   <dd>Paul Kocher; et al. <a href="https://spectreattack.com/spectre.pdf"><cite>Spectre Attacks: Exploiting Speculative Execution</cite></a>. URL: <a href="https://spectreattack.com/spectre.pdf">https://spectreattack.com/spectre.pdf</a>
   </dl>
   <aside class="dfn-panel" data-for="embedder-policy-value-credentialless">
    <b><a href="#embedder-policy-value-credentialless">#embedder-policy-value-credentialless</a></b><b>Referenced in:</b>

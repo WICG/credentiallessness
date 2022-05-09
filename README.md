@@ -1,3 +1,18 @@
+[HTML]: https://github.com/whatwg/html
+[Fetch]: https://github.com/whatwg/fetch
+
+<details>
+  <summary><strong>Obsoletion notice</strong></summary>
+  
+  [**COEP:credentialless**](https://github.com/WICG/credentiallessness) merged into the [HTML] and [Fetch] specification.
+  
+  See PR:
+  - whatwg/html/pull/6638
+  - whatwg/fetch/pull/1229
+  
+  This document is not going to be actively maintained, please refer to [HTML] and [Fetch] as the source of truth for implementations.
+</details>
+
 # COEP: credentialless. Isolation w/o Opt-In?
 
 Credentialless is a Cross-Origin-Embedder-Policy (COEP) variant. Similarly
