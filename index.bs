@@ -26,8 +26,20 @@ Custom Warning Text:
     COEP:credentialless merged into the [[HTML]] and [[Fetch]] specification. <br/>
     This document is no longer actively maintained, and should not be used as a
     guide for implementations. </br>
+    <br/>
     See PR: [whatwg/html/6638](https://github.com/whatwg/html/pull/6638),
-    [whatwg/fetch/1229](https://github.com/whatwg/fetch/pull/1229)
+    [whatwg/fetch/1229](https://github.com/whatwg/fetch/pull/1229) <br/>
+    Significant sections: 
+    HTML:
+    [(1)](https://html.spec.whatwg.org/multipage/origin.html#coep-credentialless)
+    [(2)](https://html.spec.whatwg.org/multipage/origin.html#obtain-an-embedder-policy)
+    [(3)](https://html.spec.whatwg.org/multipage/origin.html#compatible-with-cross-origin-isolation)
+    [(4)](https://fetch.spec.whatwg.org/#cross-origin-embedder-policy-allows-credentials)
+    Fetch:
+    [(1)](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check)
+    [(2)](https://fetch.spec.whatwg.org/#response-request-includes-credentials)
+    [(3)](https://fetch.spec.whatwg.org/#ref-for-cross-origin-embedder-policy-allows-credentials)
+
 </pre>
 <pre boilerplate="copyright">&copy;2021, Google, Inc. All rights reserved.</pre>
 
