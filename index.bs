@@ -117,6 +117,20 @@ spec:html; type:dfn; text:environment
 spec:url; type:dfn; for:/; text:url
 </pre>
 
+<script>
+// Redirect users toward the HTML spec.
+//
+// To avoiding breaking previously issued hyperlink, we avoid the redirect when
+// there is a hash or a search param.
+//
+// TODO(arthursonzogni): Redirect more of the previous links toward markdown.
+onload = () => {
+  if (!window.location.hash && !window.location.search) {
+    location.href = "https://html.spec.whatwg.org/C/#coep-credentialless";
+  }
+}
+</script>
+
 A problem {#problem}
 ====================
 

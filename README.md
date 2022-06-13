@@ -1,7 +1,9 @@
-[HTML]: https://github.com/whatwg/html
-[Fetch]: https://github.com/whatwg/fetch
+# COEP: credentialless. Isolation w/o Opt-In?
 
-# Obsoletion notice
+[HTML]: https://html.spec.whatwg.org/multipage/origin.html#coep-credentialless
+[FETCH]: https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check
+
+## Obsoletion notice
   
 [**COEP:credentialless**](https://github.com/WICG/credentiallessness) merged into the [HTML] and [Fetch] specification.
 
@@ -20,9 +22,9 @@ Significant sections:
 [(2)](https://fetch.spec.whatwg.org/#response-request-includes-credentials)
 [(3)](https://fetch.spec.whatwg.org/#ref-for-cross-origin-embedder-policy-allows-credentials)
 
-This document is not going to be actively maintained, please refer to [HTML] and [Fetch] as the source of truth for implementations.
+This document is not going to be actively maintained, please refer to [HTML] and [FETCH] as the source of truth for implementations.
 
-# COEP: credentialless. Isolation w/o Opt-In?
+---------------------
 
 Credentialless is a Cross-Origin-Embedder-Policy (COEP) variant. Similarly
 to
@@ -33,5 +35,6 @@ Cross-Origin-Resource-Policy (CORP) header for every no-cors subresources,
 COEP:credentialless is requesting them without credentials.
 
 - [Explainer](./explainer.md)
-- [Specification](https://wicg.github.io/credentiallessness/)
+- [Specification](https://html.spec.whatwg.org/multipage/origin.html#coep-credentialless)
+- [Historical spec/explainer](https://wicg.github.io/credentiallessness/?historical) - /:\ Please use [HTML] and [FETCH] specification instead.
 - [Experimenting instructions](./experimenting.md)

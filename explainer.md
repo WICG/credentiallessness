@@ -4,23 +4,58 @@
 
 ## A Problem
 
-Sites that wish to continue using SharedArrayBuffer must opt-into cross-origin isolation. Among other things, cross-origin isolation will block the use of cross-origin resources and documents unless those resources opt-into inclusion via either CORS or CORP. This behavior ships today in Firefox, and Chrome aims to ship it as well in 2021H1.
+Sites that wish to continue using SharedArrayBuffer must opt-into cross-origin
+isolation. Among other things, cross-origin isolation will block the use of
+cross-origin resources and documents unless those resources opt-into inclusion
+via either CORS or CORP. This behavior ships today in Firefox, and Chrome aims
+to ship it as well in 2021H1.
 
-The opt-in requirement is generally positive, as it ensures that developers have the opportunity to adequately evaluate the rewards of being included cross-site against the risks of potential data leakage via those environments. It poses adoption challenges, however, as it does require developers to adjust their servers to send an explicit opt-in. This is challenging in cases where there's not a single developer involved, but many. Google Earth, for example, includes user-generated content in sandboxed frames, and it seems somewhat unlikely that they'll be able to ensure that all the resources typed in by all their users over the years will do the work to opt-into being loadable.
+The opt-in requirement is generally positive, as it ensures that developers have
+the opportunity to adequately evaluate the rewards of being included cross-site
+against the risks of potential data leakage via those environments. It poses
+adoption challenges, however, as it does require developers to adjust their
+servers to send an explicit opt-in. This is challenging in cases where there's
+not a single developer involved, but many. Google Earth, for example, includes
+user-generated content in sandboxed frames, and it seems somewhat unlikely that
+they'll be able to ensure that all the resources typed in by all their users
+over the years will do the work to opt-into being loadable.
 
-Cases like Earth are, likely, outliers. Still, it seems clear that adoption of any opt-in mechanism is going to be limited. From a deployment perspective (especially with an eye towards changing default behaviors), it would be ideal if we could find an approach that provided robust-enough protection against accidental cross-process leakage without requiring an explicit opt-in.
+Cases like Earth are, likely, outliers. Still, it seems clear that adoption of
+any opt-in mechanism is going to be limited. From a deployment perspective
+(especially with an eye towards changing default behaviors), it would be ideal
+if we could find an approach that provided robust-enough protection against
+accidental cross-process leakage without requiring an explicit opt-in.
 
 ## A Proposal
 
-The goal of the existing opt-in is to block interesting data that an attacker wouldn't otherwise have access to from flowing into a process they control. It might be possible to obtain a similar result by minimizing the risk that outgoing requests will generate responses personalized to a specific user by extending [COEP](https://html.spec.whatwg.org/multipage/origin.html#coep) to support a new `credentialless` mode which strips credentials (cookies, client certs, etc) by default for non-CORS subresource requests. Let's explore that addition first, then look at whether it's Good Enough to enable cross-origin isolation.
+The goal of the existing opt-in is to block interesting data that an attacker
+wouldn't otherwise have access to from flowing into a process they control. It
+might be possible to obtain a similar result by minimizing the risk that
+outgoing requests will generate responses personalized to a specific user by
+extending [coep](https://html.spec.whatwg.org/multipage/origin.html#coep) to
+support a new `credentialless` mode which strips credentials (cookies, client
+certs, etc) by default for no-cors subresource requests. Let's explore that
+addition first, then look at whether it's Good Enough to enable cross-origin
+isolation.
 
 ### What is COEP:credentialless?
 
 #### Subresource requests
 
-In this new COEP variant, cross-origin no-cors subresource requests would be sent without credentials. Specific requests which require credentials can opt-into including them, at the cost of shifting the request's mode to require a [CORS check](https://fetch.spec.whatwg.org/#concept-cors-check) on the response. This bifurcation between credentiallessness and CORS means either that servers don't have browser-provided identifiers which could be used to personalize a response (see the isolation section below), or that they explicitly opt-in to exposing the response's content to the requesting origin.
+In this new COEP variant, cross-origin no-cors subresource requests would be
+sent without credentials. Specific requests which require credentials can
+opt-into including them, at the cost of shifting the request's mode to require a
+[CORS check](https://fetch.spec.whatwg.org/#concept-cors-check) on the response.
+This bifurcation between credentiallessness and CORS means either that servers
+don't have browser-provided identifiers which could be used to personalize a
+response (see the isolation section below), or that they explicitly opt-in to
+exposing the response's content to the requesting origin.
 
-As an example, consider a developer who wishes to load an image into a context isolated in the way described above. The `<img>` element has a `crossorigin` attribute which allows developers to alter the outgoing request's state. In this new mode, the following table describes the outgoing request's properties in Fetch's terms for various values:
+As an example, consider a developer who wishes to load an image into a context
+isolated in the way described above. The `<img>` element has a `crossorigin`
+attribute which allows developers to alter the outgoing request's state. In this
+new mode, the following table describes the outgoing request's properties in
+Fetch's terms for various values:
 
 | | Request's [Mode](https://fetch.spec.whatwg.org/#concept-request-mode) | Request's [Credentials Mode](https://fetch.spec.whatwg.org/#concept-request-credentials-mode) | [includeCredentials](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch) <sub> COEP:unsafe-none</sub> | [includeCredentials](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch) <sub> COEP:credentialless</sub>
 |-|----------------|----------------------------| --- | --- |
@@ -31,44 +66,108 @@ As an example, consider a developer who wishes to load an image into a context i
 
 #### Main resource requests
 
-Cross-origin nested navigational requests (`<iframe>`, etc) are more complicated, as they present risks different in kind from subresources. Frames create a browsing context with an origin distinct from the parent, which has implications on the data it has access to via requests on the one hand and storage APIs on the other. Given this capability, it seems clear that we can't just strip credentials from the nested navigational request and call it a day in the same way that we could with subresources.
+Cross-origin nested navigational requests (`<iframe>`, etc) are more
+complicated, as they present risks different in kind from subresources. Frames
+create a browsing context with an origin distinct from the parent, which has
+implications on the data it has access to via requests on the one hand and
+storage APIs on the other. Given this capability, it seems clear that we can't
+just strip credentials from the nested navigational request and call it a day in
+the same way that we could with subresources.
 
-For this reason, `COEP:credentialless` is as strict as `COEP:require-corp` for navigationnal requests, and works identically.
-  
+For this reason, `COEP:credentialless` must be as strict as `COEP:require-corp`
+for navigational requests. It works identically.
+
 That is to say:
-1. If the parent sets `COEP:credentialless` or `COEP:require-corp`, then the children must also use `COEP:credentialless` or `COEP:require-corp`. If it doen't, its response is blocked by COEP. The two COEP values can be used and mixed in any order.
-2. If the parent sets `COEP:credentialless` or `COEP:require-corp`, then the children is required to specify a CORP header when it is cross-origin.
+1. If the parent sets `COEP:credentialless` or `COEP:require-corp`, then the
+    children must also use one of those headers. The two COEP values can be used
+    and mixed in any order. If the children uses `COEP:unsafe-none`, its
+    response is blocked.
+2. If the parent sets `COEP:credentialless` or `COEP:require-corp`, then the
+    children is required to specify a CORP header when the response is
+    cross-origin.
 
-**Note:** To help developers with embedding cross-origin <iframe> without opt-in from the embeddee, the [anonymous iframe](https://github.com/w3ctag/design-reviews/issues/639) project has been proposed. This is orthogonal to `COEP:credentialless`. The latter only deals with subresources.
-  
+Note: To help developers with embedding cross-origin `<iframe>` without
+opt-in from the embeddee, the [anonymous
+iframe](https://github.com/w3ctag/design-reviews/issues/639) project has been
+proposed. It is orthogonal to `COEP:credentialless`, which only affects
+subresources.
+
+#### Redirects
+
+The decision to include credentials is done indepently for each request. The
+variable
+[includeCredentials](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)
+is set for the initial request, but also after each redirect.
+
+For example, credentials are not included for a cross-origin no-cors request,
+but they can be added in the next request if it redirects to a same-origin
+resource.
   
 #### CacheStorage requests
   
 See the issue:
-https://github.com/w3c/ServiceWorker/issues/1592
-  
-Similarly to `COEP:require-corp`, the behavior of CacheStorage must be specified for `COEP:credentialless`.
-A cross-origin credentialled response, with no CORP header, requested from `COEP:unsafe-none` context must not enter a `COEP:credentialless` context via `CacheStorage.{put,match}`.
+[w3c/ServiceWorker/issues/1592](https://github.com/w3c/ServiceWorker/issues/1592)
+
+With CacheStorage's put() and match() methods, a response fetched from a
+`COEP:unsafe-none` context can be retrieved from a  `COEP:credentialless` or
+`COEP:require-corp` context.
+
+Similarly to `COEP:require-corp`, the behavior of CacheStorage must be specified
+for `COEP:credentialless`.
 
 The solution proposed is to store the `includecredentials` variable from the
 [http-network-or-cache-fetch](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch)
-algorithm into the response. then during the [corp
+algorithm into the response. Then during the [corp
 check](https://fetch.spec.whatwg.org/#cross-origin-resource-policy-internal-check),
 to require CORP for responses requested with credentials.
 
 ### Does `COEP:credentialless` support cross-origin isolation?
 
-Above, we asserted that the core goal of the existing opt-in requirement is to block interesting data that an attacker wouldn't otherwise have access to from flowing into a process they control. Removing credentials from outgoing requests seems like quite a reasonable way to deal with this for the kinds of requests which may vary based on browser-mediated credentials (cookies, client certs, etc). In these cases, `COEP:credentialless` would seem to substantially mitigate the risk of personalized data flowing into an attacker's process.
+Above, we asserted that the core goal of the existing opt-in requirement is to
+block interesting data that an attacker wouldn't otherwise have access to from
+flowing into a process they control. Removing credentials from outgoing requests
+seems like quite a reasonable way to deal with this for the kinds of requests
+which may vary based on browser-mediated credentials (cookies, client certs,
+etc). In these cases, `COEP:credentialless` would seem to substantially mitigate
+the risk of personalized data flowing into an attacker's process.
 
-Some servers, however, don't actually use browser-mediated credentials to control access to a resource. They may examine the network characteristics of a user's request (originating IP address, [relationship with the telco](https://datapass.de/), etc) in order to determine whether and how to respond; or they might not even be accessible to attackers directly, instead requiring a user to be in a privileged network position. These resources would continue to leak data in a credentialless model.
+Some servers, however, don't actually use browser-mediated credentials to
+control access to a resource. They may examine the network characteristics of a
+user's request (originating IP address, [relationship with the
+telco](https://datapass.de/), etc) in order to determine whether and how to
+respond; or they might not even be accessible to attackers directly, instead
+requiring a user to be in a privileged network position. These resources would
+continue to leak data in a credentialless model.
 
-Let's assert for the moment that servers accessible only via a privileged network position can be dealt with entirely by putting a wall between "public" and "private", along the lines of the [CORS and RFC1918 proposal](https://wicg.github.io/cors-rfc1918/). Successfully rolling out that kind of model would address the threat of this kind of leakage, perhaps allowing us to hand-wave it away.
+Let's assert for the moment that servers accessible only via a privileged
+network position can be dealt with entirely by putting a wall between "public"
+and "private", along the lines of the [[private-network-access]]. Successfully
+rolling out that kind of model would address the threat of this kind of leakage.
+As such [[private-network-access]] is a dependency of COEP:credentialless.
 
-IP-based authentication models are, on the other hand, more difficult to address. Though the practice is unfortunate in itself (users should have control over their state vis a vis servers they interact with on the one hand, and sensitive data should [assume a zero-trust network](https://cloud.google.com/beyondcorp) on the other), we know it's used in the wild for things like telco billing pages. In a credentialless isolation model, resources these servers expose would continue to flow into cross-origin processes unless and until they explicitly opted-out of that inclusion via CORP. We can minimize the risk of these attacks by increasing CORB's robustness on the one hand, and [requiring opt-in for embedded usage](https://goto.google.com/embedding-requires-consent) on the other.
+IP-based authentication models are, on the other hand, more difficult to
+address. Though the practice is unfortunate in itself (users should have control
+over their state vis a vis servers they interact with on the one hand, and
+sensitive data should [assume a zero-trust
+network](https://cloud.google.com/beyondcorp) on the other), we know it's used
+in the wild for things like telco billing pages. In a credentialless isolation
+model, resources these servers expose would continue to flow into cross-origin
+processes unless and until they explicitly opted-out of that inclusion via CORP.
+We can minimize the risk of these attacks by increasing CORB's robustness on the
+one hand, and [requiring opt-in for embedded
+usage](https://goto.google.com/embedding-requires-consent) on the other.
 
-This leaves us with a tradeoff to evaluate: `COEP:credentialless` seems substantially easier than `COEP:require-corp` to deploy, both as an opt-in in the short-term, and (critically) as default behavior in the long term. It does substantially reduce the status quo risk. At the same time, it doesn't prevent a category of resources from flowing into attackers' processes. We have reasonable ideas about one chunk of these resources, and would simply not protect the other without explicit opt-in.
+This leaves us with a trade-off to evaluate: `COEP:credentialless` seems
+substantially easier than `COEP:require-corp` to deploy, both as an opt-in in
+the short-term, and (critically) as default behavior in the long term. It does
+substantially reduce the status quo risk. At the same time, it doesn't prevent a
+category of resources from flowing into attackers' processes. We have reasonable
+ideas about one chunk of these resources, and would simply not protect the other
+without explicit opt-in.
 
-Perhaps that's a tradeoff worth taking? The mechanism seems worth defining regardless, even if we don't end up considering it a fully cross-origin isolated context.
+Perhaps that's a trade-off worth taking? The mechanism seems worth defining
+regardless, even if we don't end up considering it a fully cross-origin isolated
+context.
 
 ## FAQ
 

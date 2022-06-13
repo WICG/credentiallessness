@@ -1489,7 +1489,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 4717b82c6, updated Thu Mar 10 13:43:21 2022 -0800" name="generator">
   <link href="https://wicg.github.io/credentiallessness/" rel="canonical">
-  <meta content="f1519cb5224b9da46371d0d41e22e67bacb3456d" name="document-revision">
+  <meta content="e784e281da754815ecb27fa5ddcc38e2d1a5a8ee" name="document-revision">
 <style>
 .monkey-patch {
     padding: .5em;
@@ -1954,7 +1954,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Cross-Origin-Embedder-Policy: credentialless</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2022-05-09">9 May 2022</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2022-06-13">13 June 2022</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
@@ -2036,6 +2036,19 @@ HTML: <a href="https://html.spec.whatwg.org/multipage/origin.html#coep-credentia
    </ol>
   </nav>
   <main>
+<script>
+// Redirect users toward the HTML spec.
+//
+// To avoiding breaking previously issued hyperlink, we avoid the redirect when
+// there is a hash or a search param.
+//
+// TODO(arthursonzogni): Redirect more of the previous links toward markdown.
+onload = () => {
+  if (!window.location.hash && !window.location.search) {
+    location.href = "https://html.spec.whatwg.org/C/#coep-credentialless";
+  }
+}
+</script>
    <h2 class="heading settled" data-level="1" id="problem"><span class="secno">1. </span><span class="content">A problem</span><a class="self-link" href="#problem"></a></h2>
    <p>Sites that wish to continue using SharedArrayBuffer must opt-into cross-origin
 isolation. Among other things, cross-origin isolation will block the use of
